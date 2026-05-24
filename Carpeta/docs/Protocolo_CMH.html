@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía de Procedimiento del Investigador - Telerehabilitación con Agente Virtual</title>
+    <style>
+        :root { --primary: #0F3B82; --primary-light: #2A5BAA; --bg-body: #F4F7F6; --bg-card: #FFFFFF; --text-main: #333333; --text-muted: #666666; --border-color: #E2E8F0; --radius: 8px; --shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-body); color: var(--text-main); line-height: 1.6; padding: 40px 20px; display: flex; justify-content: center; }
+        .container { max-width: 900px; width: 100%; }
+        .card { background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 40px; border: 1px solid var(--border-color); }
+        h1 { color: var(--primary); font-size: 1.8rem; margin-bottom: 8px; border-bottom: 2px solid var(--primary-light); padding-bottom: 10px; }
+        h2 { color: var(--primary-light); font-size: 1.3rem; margin-top: 30px; margin-bottom: 15px; }
+        h3 { color: var(--text-main); font-size: 1.1rem; margin-top: 20px; margin-bottom: 10px; }
+        p { margin-bottom: 15px; }
+        ul, ol { margin-bottom: 15px; padding-left: 20px; }
+        li { margin-bottom: 8px; }
+        .metadata-box { background-color: #F8FAFC; border-left: 4px solid var(--primary); padding: 15px; margin-bottom: 30px; border-radius: 0 var(--radius) var(--radius) 0; }
+        .metadata-box p { margin-bottom: 5px; font-size: 0.95rem; }
+        .metadata-box strong { color: var(--primary); }
+        .quote { background-color: #F1F5F9; font-style: italic; padding: 15px; border-radius: var(--radius); margin: 15px 0; color: #475569; }
+        .checkbox-list { list-style: none; padding-left: 0; }
+        .checkbox-list li { display: flex; align-items: flex-start; margin-bottom: 10px; }
+        .checkbox-list li::before { content: '☐'; font-size: 1.2rem; margin-right: 10px; color: var(--primary-light); line-height: 1.2; }
+        .condition { background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: var(--radius); padding: 12px 14px; margin-bottom: 12px; }
+        .warning { background: #FFF7ED; border-left: 4px solid #F97316; padding: 15px; margin: 15px 0; border-radius: 0 var(--radius) var(--radius) 0; }
+        .small { color: var(--text-muted); font-size: 0.92rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Guía de Procedimiento del Investigador</h1>
+            <p style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 25px;">Estudio de Agentes Virtuales (Sesión Única)</p>
+
+            <div class="metadata-box">
+                <p><strong>Estudio:</strong> Diseño y evaluación de un agente virtual inteligente para telerehabilitación: estudio de caso orientado a la motivación y calidad del registro de tareas del paciente</p>
+                <p><strong>Código de proyecto:</strong> CMH-IVA-TR-2026</p>
+                <p><strong>Investigador principal:</strong> Cristian Martínez Hernández</p>
+                <p><strong>Investigador asistente:</strong> _______________________________</p>
+                <p><strong>Unidad ejecutora:</strong> CITIC - Curso Software de Agentes Inteligentes Virtuales / Universidad de Costa Rica</p>
+                <p><strong>Tipo de sesión:</strong> Sesión única, controlada y con asignación aleatoria a condición A o B</p>
+            </div>
+
+            <h2>1. Resumen del Estudio y Preparación</h2>
+            <p>Esta guía describe el protocolo oficial para ejecutar una sesión experimental orientada a comparar dos condiciones de una aplicación móvil de telerehabilitación. El objetivo es evaluar diferencias en motivación percibida, calidad del registro de tareas, personalización percibida y calidad de interacción.</p>
+
+            <div class="condition">
+                <p><strong>Condición A:</strong> Aplicación móvil con agente virtual embodied. Incluye avatar humanoide, voz, animaciones, expresiones faciales, sincronización labial, mensajes adaptados al perfil del participante y animaciones de espera activa para mitigar la latencia.</p>
+            </div>
+            <div class="condition">
+                <p><strong>Condición B:</strong> Aplicación móvil textual sin avatar. Presenta instrucciones, recordatorios y registro de tareas mediante texto plano, sin voz, animaciones, expresiones faciales, sincronización labial ni agente embodied.</p>
+            </div>
+
+            <h3>1.1 Checklist de materiales</h3>
+            <ul class="checkbox-list">
+                <li>Formulario de consentimiento informado impreso o digital.</li>
+                <li>Dispositivo móvil con la aplicación de telerehabilitación.</li>
+                <li>Versión de la Condición A validada y funcional.</li>
+                <li>Versión de la Condición B validada y funcional.</li>
+                <li>Audífonos con micrófono funcionales y desinfectados para la Condición A.</li>
+                <li>Tabla de asignación aleatoria de participantes a Grupo A o Grupo B.</li>
+                <li>Formulario de perfil inicial del participante.</li>
+                <li>Instrumentos post-interacción: preguntas abiertas, PANAS-SF, motivación percibida, percepción del registro, personalización percibida, calidad de interacción y Godspeed para Grupo A.</li>
+                <li>Bitácora del investigador para registrar ID del participante, condición asignada, incidencias y observaciones.</li>
+                <li>Carpeta física o repositorio seguro para resguardar consentimientos y datos anonimizados.</li>
+            </ul>
+
+            <h2>2. Inducción y Bienvenida</h2>
+
+            <h3>2.1 Consentimiento informado</h3>
+            <p><strong>Saludo inicial:</strong></p>
+            <div class="quote">"Hola, muchas gracias por participar. Mi nombre es ____________________. Seré la persona investigadora encargada de guiar la sesión de hoy."</div>
+
+            <p><strong>Explicación general:</strong></p>
+            <div class="quote">"El objetivo de esta sesión es evaluar una aplicación móvil de apoyo a tareas de telerehabilitación. Durante la sesión se le asignará una versión de la aplicación, realizará una tarea guiada y luego responderá un cuestionario sobre su experiencia."</div>
+
+            <p><strong>Lectura del consentimiento:</strong></p>
+            <div class="quote">"Vamos a revisar el consentimiento informado. Su participación es voluntaria. Puede retirarse del estudio en cualquier momento, sin ninguna consecuencia. Los datos serán analizados de forma anónima mediante un ID de participante."</div>
+
+            <p><strong>Pregunta de aceptación obligatoria:</strong></p>
+            <div class="quote">"Después de leer el consentimiento informado, ¿acepta participar voluntariamente en este estudio?"</div>
+
+            <p><strong>Si la respuesta es afirmativa:</strong> solicite la firma del consentimiento informado, asigne un ID numérico al participante y registre dicho ID en la bitácora. No utilice el nombre legal del participante en los cuestionarios ni en los logs del sistema.</p>
+            <p><strong>Si la respuesta es negativa:</strong> agradezca su tiempo, no continúe con la sesión y no recolecte datos.</p>
+
+            <h3>2.2 Asignación aleatoria a condición</h3>
+            <p>Utilice la tabla de asignación aleatoria para determinar la condición del participante. La asignación debe realizarse sin explicar al participante cuál condición se espera que produzca mejores resultados.</p>
+            <ul>
+                <li><strong>Grupo A:</strong> cargar la aplicación móvil con agente virtual embodied.</li>
+                <li><strong>Grupo B:</strong> cargar la aplicación móvil textual sin avatar.</li>
+            </ul>
+            <p class="small">Nota para el investigador: no utilizar expresiones como “versión avanzada”, “versión más interactiva” o “versión mejorada”, ya que podrían inducir sesgo.</p>
+
+            <h3>2.3 Cuestionario inicial</h3>
+            <p>Solicite al participante completar la información inicial: ID del participante, condición asignada, edad, sexo, experiencia previa con aplicaciones de salud o rehabilitación y nivel de familiaridad tecnológica.</p>
+
+            <h2>3. Fase de Interacción</h2>
+
+            <h3>3.1 Instrucciones neutrales de la tarea</h3>
+            <p><strong>Investigador:</strong></p>
+            <div class="quote">"A continuación, utilizará una aplicación móvil para revisar una tarea de telerehabilitación, seguir las instrucciones presentadas y registrar la actividad realizada. Por favor, utilice la aplicación como lo haría normalmente. No hay respuestas correctas o incorrectas; nos interesa conocer su experiencia con el sistema."</div>
+
+            <p><strong>Escenario de tarea:</strong></p>
+            <div class="quote">"Imagine que debe realizar una tarea breve de rehabilitación en casa. La aplicación le presentará las instrucciones de la actividad. Después de revisarlas y completar la interacción, deberá registrar la tarea realizada dentro del sistema."</div>
+
+            <div class="warning">
+                <p><strong>Importante:</strong> Las instrucciones deben mantenerse neutras. No sugiera al participante que el agente virtual debería motivarlo, acompañarlo o mejorar su experiencia. Tampoco indique que la condición textual es inferior o de control.</p>
+            </div>
+
+            <h3>3.2 Carga de la condición asignada</h3>
+            <ul>
+                <li><strong>Grupo A:</strong> active el avatar, verifique audio, micrófono, TTS, STT, animaciones y sincronización labial. Si se produce latencia, el agente debe ejecutar animaciones de espera activa.</li>
+                <li><strong>Grupo B:</strong> active la interfaz textual, verifique que las instrucciones y el formulario de registro estén disponibles sin avatar, voz ni animaciones.</li>
+            </ul>
+
+            <h3>3.3 Desarrollo de la sesión</h3>
+            <p>El participante utiliza la aplicación durante el tiempo definido para la sesión. El investigador debe mantenerse fuera de la vista directa del participante o en silencio para reducir sesgos de observación.</p>
+            <p>Si el participante solicita ayuda técnica, proporcione apoyo mínimo y neutral, sin explicar cómo debería sentirse ni cómo debería evaluar el sistema.</p>
+
+            <h2>4. Cierre del Estudio y Recolección de Datos</h2>
+
+            <h3>4.1 Cuestionarios post-interacción</h3>
+            <p>Al finalizar la tarea, el investigador agradece al participante y solicita completar los instrumentos post-interacción.</p>
+            <p><strong>Investigador:</strong></p>
+            <div class="quote">"Gracias. Ahora le pediré que complete un conjunto de preguntas sobre su experiencia con la aplicación. Responda de acuerdo con lo que percibió durante esta sesión."</div>
+
+            <p><strong>Instrumentos a aplicar:</strong></p>
+            <ol>
+                <li>Preguntas abiertas sobre la experiencia.</li>
+                <li>PANAS-SF para afecto positivo y negativo posterior a la interacción.</li>
+                <li>Escala de motivación percibida.</li>
+                <li>Escala de percepción del registro de tareas.</li>
+                <li>Escala de personalización percibida.</li>
+                <li>Escala de calidad de interacción.</li>
+                <li>Godspeed adaptado, únicamente para participantes del Grupo A.</li>
+            </ol>
+
+            <h3>4.2 Preguntas abiertas sobre la experiencia</h3>
+            <p>Estas preguntas deben responderse antes de las escalas cerradas para capturar una percepción inicial menos condicionada por los ítems del cuestionario.</p>
+            <div class="metadata-box">
+                <p><strong>Preguntas:</strong></p>
+                <ul>
+                    <li>¿Cómo describiría su experiencia general con el sistema?</li>
+                    <li>¿Qué aspectos le resultaron más útiles o motivadores?</li>
+                    <li>¿Qué dificultades encontró durante la interacción?</li>
+                    <li>¿Qué mejoras sugeriría para el sistema?</li>
+                </ul>
+            </div>
+
+            <h3>4.3 Despedida</h3>
+            <p>Al finalizar los cuestionarios, agradezca la participación y recuerde que los datos serán tratados de forma anónima.</p>
+            <p><strong>Investigador:</strong></p>
+            <div class="quote">"Muchas gracias por su participación. Sus respuestas son muy valiosas para comprender cómo las aplicaciones de telerehabilitación pueden apoyar mejor a los pacientes. Que tenga un excelente día."</div>
+
+            <h2>5. Anonimización, Resguardo y Gestión Final de Datos</h2>
+            <p>Inmediatamente después de que el participante finalice la sesión:</p>
+            <ul class="checkbox-list">
+                <li>Verifique que los cuestionarios estén asociados únicamente al ID del participante.</li>
+                <li>Confirme que los logs de interacción y registros de tareas se hayan guardado con el ID asignado, sin nombre legal ni datos identificables.</li>
+                <li>Separe los consentimientos informados de los datos experimentales. Los consentimientos no deben almacenarse junto con los logs ni cuestionarios.</li>
+                <li>Guarde los datos digitales en una carpeta segura con acceso restringido al equipo investigador.</li>
+                <li>Si se grabó audio o se almacenaron logs de conversación, verifique que el archivo no incluya nombres personales, números de identificación, teléfonos, direcciones u otros datos sensibles.</li>
+                <li>Registre cualquier incidencia técnica en la bitácora, por ejemplo fallos de audio, latencia excesiva, errores de carga o interrupciones durante la sesión.</li>
+                <li>Desinfecte los dispositivos utilizados y prepare el equipo para el siguiente participante.</li>
+            </ul>
+
+            <div class="metadata-box">
+                <p><strong>Plan de resguardo:</strong> Los datos se almacenarán bajo un identificador numérico de participante. La base de correspondencia entre ID y consentimiento informado será resguardada por separado. Los logs de conversación, registros de tareas y cuestionarios serán utilizados únicamente con fines académicos y analizados de forma agregada.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
