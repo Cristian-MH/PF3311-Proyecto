@@ -7,7 +7,7 @@ on:
 
 env:
   AZURE_WEBAPP_NAME: pf3311
-  PROJECT_PATH: ./PF3311.TeleRehab.Api/PF3311.TeleRehab.Api.csproj
+  PROJECT_PATH: ./Backend/PF3311.TeleRehab.Api/PF3311.TeleRehab.Api.csproj
   PUBLISH_DIR: ./publish
 
 jobs:
