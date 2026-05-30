@@ -35,3 +35,4 @@
 /Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/bin/Debug/net10.0/Swashbuckle.AspNetCore.Swagger.dll
 /Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/bin/Debug/net10.0/Swashbuckle.AspNetCore.SwaggerGen.dll
 /Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/bin/Debug/net10.0/Swashbuckle.AspNetCore.SwaggerUI.dll
+/Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/bin/Debug/net10.0/Data/tele-rehab-data.json

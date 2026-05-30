@@ -86,7 +86,7 @@ public class TherapyLogsController : ControllerBase
         log.Id = Guid.NewGuid();
         log.CompletedAt = DateTime.UtcNow;
 
-        _database.TherapyLogs.Add(log);
+        _database.AddTherapyLog(log);
 
         return CreatedAtAction(nameof(GetById), new { id = log.Id }, log);
     }
@@ -99,7 +99,7 @@ public class TherapyLogsController : ControllerBase
         if (log is null)
             return NotFound(new { message = "Therapy log not found." });
 
-        _database.TherapyLogs.Remove(log);
+        _database.RemoveTherapyLog(id);
 
         return NoContent();
     }

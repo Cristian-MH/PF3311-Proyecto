@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PF3311.Telerehab.API.Data;
 using PF3311.Telerehab.API.Models;
+
 namespace PF3311.Telerehab.API.Controllers;
 
 [ApiController]
@@ -39,7 +40,7 @@ public class PatientsController : ControllerBase
 
         patient.Id = Guid.NewGuid();
 
-        _database.Patients.Add(patient);
+        _database.AddPatient(patient);
 
         return CreatedAtAction(nameof(GetById), new { id = patient.Id }, patient);
     }
@@ -57,6 +58,7 @@ public class PatientsController : ControllerBase
         patient.Sex = updatedPatient.Sex;
         patient.Condition = updatedPatient.Condition;
         patient.TechnologyLevel = updatedPatient.TechnologyLevel;
+        _database.UpdatePatient(patient);
 
         return Ok(patient);
     }
@@ -64,12 +66,8 @@ public class PatientsController : ControllerBase
     [HttpDelete("{id:guid}")]
     public IActionResult Delete(Guid id)
     {
-        var patient = _database.Patients.FirstOrDefault(p => p.Id == id);
-
-        if (patient is null)
+        if (!_database.RemovePatient(id))
             return NotFound(new { message = "Patient not found." });
-
-        _database.Patients.Remove(patient);
 
         return NoContent();
     }

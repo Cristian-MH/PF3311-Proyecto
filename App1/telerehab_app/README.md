@@ -1,17 +1,53 @@
-# telerehab_app
+# Telerehab App
 
-A new Flutter project.
+A Flutter-based telerehabilitation application for managing patients, therapies, and therapy logs.
 
-## Getting Started
+## Project Overview
 
-This project is a starting point for a Flutter application.
+This project includes:
+- `lib/models/` for data models like `patient`, `therapy`, and `therapy_log`
+- `lib/screens/` and `lib/services/` for application UI and business logic
+- platform-specific folders for Android, iOS, macOS, Linux, web, and Windows targets
 
-A few resources to get you started if this is your first Flutter project:
+## Setup
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+1. Install Flutter: https://flutter.dev/docs/get-started/install
+2. Open the project in your IDE.
+3. Fetch dependencies:
+   ```bash
+   flutter pub get
+   ```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Running the App
+
+Run on a connected device or emulator:
+
+```bash
+flutter run
+```
+
+To target a specific platform, add a device ID or platform flag:
+
+```bash
+flutter run -d chrome
+flutter run -d ios
+flutter run -d macos
+```
+
+## Testing
+
+Run widget tests with:
+
+```bash
+flutter test
+```
+
+## Notes
+
+- Keep `pubspec.yaml` and `pubspec.lock` under version control for stable dependency resolution.
+- Do not commit generated build artifacts from `build/`, `.dart_tool/`, or platform-specific temporary files.
+
+## Resources
+
+- [Flutter documentation](https://docs.flutter.dev/)
+- [Flutter packages](https://pub.dev/)

@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using PF3311.Telerehab.API.Data;
 using PF3311.Telerehab.API.Models;
 
-namespace TeleRehab.Api.Controllers;
+namespace PF3311.Telerehab.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

@@ -60,7 +60,7 @@ public class TherapiesController : ControllerBase
 
         therapy.Id = Guid.NewGuid();
 
-        _database.Therapies.Add(therapy);
+        _database.AddTherapy(therapy);
 
         return CreatedAtAction(nameof(GetById), new { id = therapy.Id }, therapy);
     }
@@ -83,6 +83,7 @@ public class TherapiesController : ControllerBase
         therapy.Instructions = updatedTherapy.Instructions;
         therapy.Repetitions = updatedTherapy.Repetitions;
         therapy.Frequency = updatedTherapy.Frequency;
+        _database.UpdateTherapy(therapy);
 
         return Ok(therapy);
     }
@@ -95,7 +96,7 @@ public class TherapiesController : ControllerBase
         if (therapy is null)
             return NotFound(new { message = "Therapy not found." });
 
-        _database.Therapies.Remove(therapy);
+        _database.RemoveTherapy(id);
 
         return NoContent();
     }

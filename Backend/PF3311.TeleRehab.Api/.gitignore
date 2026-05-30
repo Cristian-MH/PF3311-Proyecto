@@ -1,0 +1,18 @@
+# .NET build output
+bin/
+obj/
+
+# IDE and user-specific files
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# Local environment overrides
+.env
+appsettings.Local.json
+
+# Logs and operating system files
+*.log
+.DS_Store
