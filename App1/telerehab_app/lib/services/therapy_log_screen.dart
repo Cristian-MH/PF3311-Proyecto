@@ -49,11 +49,7 @@ class _TherapyLogScreenState extends State<TherapyLogScreen> {
 
       final message = await _apiService.getMotivationMessage(
         patientId: widget.patient.id,
-        patientName: widget.patient.fullName,
-        age: widget.patient.age,
-        therapyName: widget.therapy.name,
-        mood: _moodLevel <= 2 ? 'cansado' : 'normal',
-        completedLastTherapy: _completed,
+        therapyId: widget.therapy.id,
       );
 
       if (!mounted) return;

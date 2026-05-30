@@ -34,6 +34,15 @@ public class InMemoryDatabase
     public void AddTherapies(IEnumerable<Therapy> therapies) => AddRange(_state.Therapies, therapies);
     public void AddTherapyLog(TherapyLog log) => Add(_state.TherapyLogs, log);
 
+    public IReadOnlyList<TherapyLog> GetRecentTherapyLogs(Guid patientId, int count = 5)
+    {
+        return GetValues(_state.TherapyLogs)
+            .Where(log => log.PatientId == patientId)
+            .OrderByDescending(log => log.CompletedAt)
+            .Take(count)
+            .ToList();
+    }
+
     public void CleanupExpiredData()
     {
         lock (_sync)

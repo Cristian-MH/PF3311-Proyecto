@@ -49,13 +49,18 @@ Open the Swagger UI using the URL printed by the application, followed by
 | `POST` | `/api/therapies/generate/{patientId}` | Generate and store 5 to 7 exercises with OpenAI |
 | `GET` | `/api/therapies/patient/{patientId}` | List a patient's exercises |
 | `POST` | `/api/therapylogs` | Register exercise progress |
-| `POST` | `/api/motivation/message` | Generate a motivation message |
+| `POST` | `/api/motivation/message` | Generate a personalized motivation message with OpenAI |
 
 The OpenAI request sends only the age, sex, condition, and technology level
 needed to generate the plan. It uses the Responses API with Structured Outputs
 and `store: false`. The API validates that at least five exercises were
 returned before storing them. This prototype is not appropriate for real
 medical records, and generated exercises require clinician review before use.
+
+Motivation messages are also generated with OpenAI and `store: false`. The
+client sends only the patient and therapy IDs. The API builds the personalized
+context from the stored patient record, exercise, and five most recent progress
+logs.
 
 ## Azure Deployment With Zero Cost
 

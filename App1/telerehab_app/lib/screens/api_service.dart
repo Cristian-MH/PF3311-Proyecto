@@ -50,22 +50,14 @@ class ApiService {
 
   Future<String> getMotivationMessage({
     required String patientId,
-    required String patientName,
-    required int age,
-    required String therapyName,
-    required String mood,
-    required bool completedLastTherapy,
+    required String therapyId,
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/Motivation/message'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'patientId': patientId,
-        'patientName': patientName,
-        'age': age,
-        'therapyName': therapyName,
-        'mood': mood,
-        'completedLastTherapy': completedLastTherapy,
+        'therapyId': therapyId,
       }),
     );
 

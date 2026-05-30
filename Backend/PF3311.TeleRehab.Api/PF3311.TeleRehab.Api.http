@@ -18,4 +18,14 @@ POST {{PF3311.TeleRehab.Api_HostAddress}}/api/therapies/generate/{{patientId}}
 ###
 
 GET {{PF3311.TeleRehab.Api_HostAddress}}/api/therapies/patient/{{patientId}}
+
+###
+
+POST {{PF3311.TeleRehab.Api_HostAddress}}/api/motivation/message
+Content-Type: application/json
+
+{
+  "patientId": "{{patientId}}",
+  "therapyId": "{{therapyId}}"
+}
 ###

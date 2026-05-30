@@ -16,13 +16,34 @@ public class MotivationController : ControllerBase
     }
 
     [HttpPost("message")]
-    public IActionResult GenerateMessage([FromBody] MotivationRequest request)
+    public async Task<IActionResult> GenerateMessage(
+        [FromBody] MotivationRequest request,
+        CancellationToken cancellationToken)
     {
-        var message = _motivationService.GenerateMessage(request);
-
-        return Ok(new
+        try
         {
-            message
-        });
+            var message = await _motivationService.GenerateMessageAsync(request, cancellationToken);
+
+            return Ok(new
+            {
+                message
+            });
+        }
+        catch (MotivationContextNotFoundException exception)
+        {
+            return NotFound(new { message = exception.Message });
+        }
+        catch (OpenAiConfigurationException exception)
+        {
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = exception.Message });
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or OpenAiMotivationGenerationException)
+        {
+            return StatusCode(StatusCodes.Status502BadGateway, new
+            {
+                message = "OpenAI could not generate the motivation message."
+            });
+        }
     }
 }

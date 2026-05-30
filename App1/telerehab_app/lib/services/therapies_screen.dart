@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/patient.dart';
 import '../models/therapy.dart';
-import '../services/api_service.dart';
+import '../screens/api_service.dart';
 import 'therapy_log_screen.dart';
 
 class TherapiesScreen extends StatefulWidget {
