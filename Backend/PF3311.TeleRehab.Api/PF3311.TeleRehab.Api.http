@@ -1,0 +1,6 @@
+@PF3311.TeleRehab.Api_HostAddress = http://localhost:5150
+
+GET {{PF3311.TeleRehab.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
