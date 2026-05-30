@@ -15,55 +15,6 @@ public class TherapyLogsController : ControllerBase
         _database = database;
     }
 
-    [HttpGet]
-    public IActionResult GetAll()
-    {
-        return Ok(_database.TherapyLogs);
-    }
-
-    [HttpGet("{id:guid}")]
-    public IActionResult GetById(Guid id)
-    {
-        var log = _database.TherapyLogs.FirstOrDefault(l => l.Id == id);
-
-        if (log is null)
-            return NotFound(new { message = "Therapy log not found." });
-
-        return Ok(log);
-    }
-
-    [HttpGet("patient/{patientId:guid}")]
-    public IActionResult GetByPatientId(Guid patientId)
-    {
-        var patientExists = _database.Patients.Any(p => p.Id == patientId);
-
-        if (!patientExists)
-            return NotFound(new { message = "Patient not found." });
-
-        var logs = _database.TherapyLogs
-            .Where(l => l.PatientId == patientId)
-            .OrderByDescending(l => l.CompletedAt)
-            .ToList();
-
-        return Ok(logs);
-    }
-
-    [HttpGet("therapy/{therapyId:guid}")]
-    public IActionResult GetByTherapyId(Guid therapyId)
-    {
-        var therapyExists = _database.Therapies.Any(t => t.Id == therapyId);
-
-        if (!therapyExists)
-            return NotFound(new { message = "Therapy not found." });
-
-        var logs = _database.TherapyLogs
-            .Where(l => l.TherapyId == therapyId)
-            .OrderByDescending(l => l.CompletedAt)
-            .ToList();
-
-        return Ok(logs);
-    }
-
     [HttpPost]
     public IActionResult Create([FromBody] TherapyLog log)
     {
@@ -88,19 +39,6 @@ public class TherapyLogsController : ControllerBase
 
         _database.AddTherapyLog(log);
 
-        return CreatedAtAction(nameof(GetById), new { id = log.Id }, log);
-    }
-
-    [HttpDelete("{id:guid}")]
-    public IActionResult Delete(Guid id)
-    {
-        var log = _database.TherapyLogs.FirstOrDefault(l => l.Id == id);
-
-        if (log is null)
-            return NotFound(new { message = "Therapy log not found." });
-
-        _database.RemoveTherapyLog(id);
-
-        return NoContent();
+        return StatusCode(StatusCodes.Status201Created, log);
     }
 }

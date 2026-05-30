@@ -1,8 +1,8 @@
 # PF3311 TeleRehab API
 
-Experimental ASP.NET Core API for a telerehabilitation prototype. It provides
-patients, therapies, therapy logs, motivation messages, and simple agent
-interactions.
+Experimental ASP.NET Core API for a telerehabilitation prototype. It registers
+patients, generates therapy exercises with OpenAI, stores therapy logs, and
+provides motivation messages.
 
 ## Storage
 
@@ -33,6 +33,7 @@ Requirements:
 Start the API:
 
 ```bash
+export OpenAI__ApiKey="your-api-key"
 dotnet restore
 dotnet run
 ```
@@ -44,11 +45,17 @@ Open the Swagger UI using the URL printed by the application, followed by
 
 | Method | Route | Purpose |
 | --- | --- | --- |
-| `GET`, `POST` | `/api/patients` | List or create patients |
-| `GET`, `POST` | `/api/therapies` | List or create therapies |
-| `GET`, `POST` | `/api/therapylogs` | List or create therapy logs |
+| `POST` | `/api/patients` | Register a patient |
+| `POST` | `/api/therapies/generate/{patientId}` | Generate and store 5 to 7 exercises with OpenAI |
+| `GET` | `/api/therapies/patient/{patientId}` | List a patient's exercises |
+| `POST` | `/api/therapylogs` | Register exercise progress |
 | `POST` | `/api/motivation/message` | Generate a motivation message |
-| `POST` | `/api/agent/interact` | Get a simple agent response |
+
+The OpenAI request sends only the age, sex, condition, and technology level
+needed to generate the plan. It uses the Responses API with Structured Outputs
+and `store: false`. The API validates that at least five exercises were
+returned before storing them. This prototype is not appropriate for real
+medical records, and generated exercises require clinician review before use.
 
 ## Azure Deployment With Zero Cost
 
@@ -60,6 +67,8 @@ Configure these App Service application settings:
 ```text
 DataStore__FilePath=/home/data/tele-rehab-data.json
 DataStore__ItemLifetimeHours=1
+OpenAI__ApiKey=<your-api-key>
+OpenAI__Model=gpt-5.4-mini
 ```
 
 For a Linux custom container, also configure:

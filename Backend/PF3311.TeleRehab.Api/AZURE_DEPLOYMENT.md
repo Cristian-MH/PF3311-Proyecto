@@ -12,6 +12,8 @@ Configure these application settings in Azure:
 | --- | --- |
 | `DataStore__FilePath` | `/home/data/tele-rehab-data.json` |
 | `DataStore__ItemLifetimeHours` | `1` |
+| `OpenAI__ApiKey` | Your OpenAI API key |
+| `OpenAI__Model` | `gpt-5.4-mini` |
 
 For a Linux custom container, also configure:
 

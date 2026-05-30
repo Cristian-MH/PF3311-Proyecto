@@ -15,60 +15,22 @@ public class PatientsController : ControllerBase
         _database = database;
     }
 
-    [HttpGet]
-    public IActionResult GetAll()
-    {
-        return Ok(_database.Patients);
-    }
-
-    [HttpGet("{id:guid}")]
-    public IActionResult GetById(Guid id)
-    {
-        var patient = _database.Patients.FirstOrDefault(p => p.Id == id);
-
-        if (patient is null)
-            return NotFound(new { message = "Patient not found." });
-
-        return Ok(patient);
-    }
-
     [HttpPost]
     public IActionResult Create([FromBody] Patient patient)
     {
         if (string.IsNullOrWhiteSpace(patient.FullName))
             return BadRequest(new { message = "FullName is required." });
 
+        if (patient.Age < 1 || patient.Age > 120)
+            return BadRequest(new { message = "Age must be between 1 and 120." });
+
+        if (string.IsNullOrWhiteSpace(patient.Condition))
+            return BadRequest(new { message = "Condition is required." });
+
         patient.Id = Guid.NewGuid();
 
         _database.AddPatient(patient);
 
-        return CreatedAtAction(nameof(GetById), new { id = patient.Id }, patient);
-    }
-
-    [HttpPut("{id:guid}")]
-    public IActionResult Update(Guid id, [FromBody] Patient updatedPatient)
-    {
-        var patient = _database.Patients.FirstOrDefault(p => p.Id == id);
-
-        if (patient is null)
-            return NotFound(new { message = "Patient not found." });
-
-        patient.FullName = updatedPatient.FullName;
-        patient.Age = updatedPatient.Age;
-        patient.Sex = updatedPatient.Sex;
-        patient.Condition = updatedPatient.Condition;
-        patient.TechnologyLevel = updatedPatient.TechnologyLevel;
-        _database.UpdatePatient(patient);
-
-        return Ok(patient);
-    }
-
-    [HttpDelete("{id:guid}")]
-    public IActionResult Delete(Guid id)
-    {
-        if (!_database.RemovePatient(id))
-            return NotFound(new { message = "Patient not found." });
-
-        return NoContent();
+        return StatusCode(StatusCodes.Status201Created, patient);
     }
 }

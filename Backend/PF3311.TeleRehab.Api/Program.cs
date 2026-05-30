@@ -9,6 +9,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<InMemoryDatabase>();
 builder.Services.AddSingleton<MotivationService>();
+builder.Services.AddHttpClient<OpenAiTherapyService>();
 
 var app = builder.Build();
 

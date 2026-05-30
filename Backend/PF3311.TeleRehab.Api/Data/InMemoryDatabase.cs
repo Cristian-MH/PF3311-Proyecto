@@ -29,18 +29,10 @@ public class InMemoryDatabase
 
     public IReadOnlyList<Patient> Patients => GetValues(_state.Patients);
     public IReadOnlyList<Therapy> Therapies => GetValues(_state.Therapies);
-    public IReadOnlyList<TherapyLog> TherapyLogs => GetValues(_state.TherapyLogs);
 
     public void AddPatient(Patient patient) => Add(_state.Patients, patient);
-    public void AddTherapy(Therapy therapy) => Add(_state.Therapies, therapy);
+    public void AddTherapies(IEnumerable<Therapy> therapies) => AddRange(_state.Therapies, therapies);
     public void AddTherapyLog(TherapyLog log) => Add(_state.TherapyLogs, log);
-
-    public void UpdatePatient(Patient patient) => Refresh(_state.Patients, item => item.Value.Id == patient.Id);
-    public void UpdateTherapy(Therapy therapy) => Refresh(_state.Therapies, item => item.Value.Id == therapy.Id);
-
-    public bool RemovePatient(Guid id) => Remove(_state.Patients, item => item.Value.Id == id);
-    public bool RemoveTherapy(Guid id) => Remove(_state.Therapies, item => item.Value.Id == id);
-    public bool RemoveTherapyLog(Guid id) => Remove(_state.TherapyLogs, item => item.Value.Id == id);
 
     public void CleanupExpiredData()
     {
@@ -75,28 +67,12 @@ public class InMemoryDatabase
         }
     }
 
-    private void Refresh<T>(List<InMemoryItem<T>> items, Func<InMemoryItem<T>, bool> predicate)
+    private void AddRange<T>(List<InMemoryItem<T>> items, IEnumerable<T> values)
     {
         lock (_sync)
         {
-            var item = items.First(predicate);
-            item.RefreshExpiration(_itemLifetime);
+            items.AddRange(values.Select(value => new InMemoryItem<T>(value, _itemLifetime)));
             Save();
-        }
-    }
-
-    private bool Remove<T>(List<InMemoryItem<T>> items, Func<InMemoryItem<T>, bool> predicate)
-    {
-        lock (_sync)
-        {
-            var item = items.FirstOrDefault(predicate);
-
-            if (item is null)
-                return false;
-
-            items.Remove(item);
-            Save();
-            return true;
         }
     }
 

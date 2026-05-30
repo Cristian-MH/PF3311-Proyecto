@@ -1,6 +1,21 @@
 @PF3311.TeleRehab.Api_HostAddress = http://localhost:5150
 
-GET {{PF3311.TeleRehab.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+POST {{PF3311.TeleRehab.Api_HostAddress}}/api/patients
+Content-Type: application/json
 
+{
+  "fullName": "Paciente de prueba",
+  "age": 45,
+  "sex": "F",
+  "condition": "Rehabilitación de rodilla",
+  "technologyLevel": "medium"
+}
+
+###
+
+POST {{PF3311.TeleRehab.Api_HostAddress}}/api/therapies/generate/{{patientId}}
+
+###
+
+GET {{PF3311.TeleRehab.Api_HostAddress}}/api/therapies/patient/{{patientId}}
 ###

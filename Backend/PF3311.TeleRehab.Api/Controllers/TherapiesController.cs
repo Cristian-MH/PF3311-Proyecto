@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PF3311.Telerehab.API.Data;
 using PF3311.Telerehab.API.Models;
+using PF3311.Telerehab.API.Services;
 
 namespace PF3311.Telerehab.API.Controllers;
 
@@ -9,27 +10,12 @@ namespace PF3311.Telerehab.API.Controllers;
 public class TherapiesController : ControllerBase
 {
     private readonly InMemoryDatabase _database;
+    private readonly OpenAiTherapyService _therapyService;
 
-    public TherapiesController(InMemoryDatabase database)
+    public TherapiesController(InMemoryDatabase database, OpenAiTherapyService therapyService)
     {
         _database = database;
-    }
-
-    [HttpGet]
-    public IActionResult GetAll()
-    {
-        return Ok(_database.Therapies);
-    }
-
-    [HttpGet("{id:guid}")]
-    public IActionResult GetById(Guid id)
-    {
-        var therapy = _database.Therapies.FirstOrDefault(t => t.Id == id);
-
-        if (therapy is null)
-            return NotFound(new { message = "Therapy not found." });
-
-        return Ok(therapy);
+        _therapyService = therapyService;
     }
 
     [HttpGet("patient/{patientId:guid}")]
@@ -47,57 +33,32 @@ public class TherapiesController : ControllerBase
         return Ok(therapies);
     }
 
-    [HttpPost]
-    public IActionResult Create([FromBody] Therapy therapy)
+    [HttpPost("generate/{patientId:guid}")]
+    public async Task<IActionResult> Generate(Guid patientId, CancellationToken cancellationToken)
     {
-        var patientExists = _database.Patients.Any(p => p.Id == therapy.PatientId);
+        var patient = _database.Patients.FirstOrDefault(p => p.Id == patientId);
 
-        if (!patientExists)
-            return BadRequest(new { message = "Invalid PatientId. Patient does not exist." });
+        if (patient is null)
+            return NotFound(new { message = "Patient not found." });
 
-        if (string.IsNullOrWhiteSpace(therapy.Name))
-            return BadRequest(new { message = "Name is required." });
+        try
+        {
+            var therapies = await _therapyService.GenerateAsync(patient, cancellationToken);
+            _database.AddTherapies(therapies);
 
-        therapy.Id = Guid.NewGuid();
-
-        _database.AddTherapy(therapy);
-
-        return CreatedAtAction(nameof(GetById), new { id = therapy.Id }, therapy);
-    }
-
-    [HttpPut("{id:guid}")]
-    public IActionResult Update(Guid id, [FromBody] Therapy updatedTherapy)
-    {
-        var therapy = _database.Therapies.FirstOrDefault(t => t.Id == id);
-
-        if (therapy is null)
-            return NotFound(new { message = "Therapy not found." });
-
-        var patientExists = _database.Patients.Any(p => p.Id == updatedTherapy.PatientId);
-
-        if (!patientExists)
-            return BadRequest(new { message = "Invalid PatientId. Patient does not exist." });
-
-        therapy.PatientId = updatedTherapy.PatientId;
-        therapy.Name = updatedTherapy.Name;
-        therapy.Instructions = updatedTherapy.Instructions;
-        therapy.Repetitions = updatedTherapy.Repetitions;
-        therapy.Frequency = updatedTherapy.Frequency;
-        _database.UpdateTherapy(therapy);
-
-        return Ok(therapy);
-    }
-
-    [HttpDelete("{id:guid}")]
-    public IActionResult Delete(Guid id)
-    {
-        var therapy = _database.Therapies.FirstOrDefault(t => t.Id == id);
-
-        if (therapy is null)
-            return NotFound(new { message = "Therapy not found." });
-
-        _database.RemoveTherapy(id);
-
-        return NoContent();
+            return StatusCode(StatusCodes.Status201Created, therapies);
+        }
+        catch (OpenAiConfigurationException exception)
+        {
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = exception.Message });
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or OpenAiTherapyGenerationException)
+        {
+            return StatusCode(StatusCodes.Status502BadGateway, new
+            {
+                message = "OpenAI could not generate the therapy plan."
+            });
+        }
     }
 }

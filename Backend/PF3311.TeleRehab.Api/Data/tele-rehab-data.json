@@ -1,5 +1,17 @@
 {
-  "patients": [],
+  "patients": [
+    {
+      "value": {
+        "id": "586238e5-a1a2-457c-87ff-037daef4abca",
+        "fullName": "string",
+        "age": 20,
+        "sex": "string",
+        "condition": "string",
+        "technologyLevel": "string"
+      },
+      "expiresAtUtc": "2026-05-31T00:15:15.104989Z"
+    }
+  ],
   "therapies": [],
   "therapyLogs": []
 }

@@ -1,5 +1,6 @@
 /Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/bin/Debug/net10.0/appsettings.Development.json
 /Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/bin/Debug/net10.0/appsettings.json
+/Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/bin/Debug/net10.0/Data/tele-rehab-data.json
 /Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/bin/Debug/net10.0/PF3311.TeleRehab.Api.staticwebassets.endpoints.json
 /Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/bin/Debug/net10.0/PF3311.TeleRehab.Api
 /Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/bin/Debug/net10.0/PF3311.TeleRehab.Api.deps.json
@@ -8,6 +9,9 @@
 /Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/bin/Debug/net10.0/PF3311.TeleRehab.Api.pdb
 /Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/bin/Debug/net10.0/Microsoft.AspNetCore.OpenApi.dll
 /Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/bin/Debug/net10.0/Microsoft.OpenApi.dll
+/Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/bin/Debug/net10.0/Swashbuckle.AspNetCore.Swagger.dll
+/Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/bin/Debug/net10.0/Swashbuckle.AspNetCore.SwaggerGen.dll
+/Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/bin/Debug/net10.0/Swashbuckle.AspNetCore.SwaggerUI.dll
 /Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/obj/Debug/net10.0/PF3311.TeleRehab.Api.csproj.AssemblyReference.cache
 /Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/obj/Debug/net10.0/rpswa.dswa.cache.json
 /Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/obj/Debug/net10.0/PF3311.TeleRehab.Api.GeneratedMSBuildEditorConfig.editorconfig
@@ -32,7 +36,3 @@
 /Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/obj/Debug/net10.0/PF3311.TeleRehab.Api.pdb
 /Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/obj/Debug/net10.0/PF3311.TeleRehab.Api.genruntimeconfig.cache
 /Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/obj/Debug/net10.0/ref/PF3311.TeleRehab.Api.dll
-/Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/bin/Debug/net10.0/Swashbuckle.AspNetCore.Swagger.dll
-/Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/bin/Debug/net10.0/Swashbuckle.AspNetCore.SwaggerGen.dll
-/Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/bin/Debug/net10.0/Swashbuckle.AspNetCore.SwaggerUI.dll
-/Users/cristian/UCR/PF3311/PF3311-Proyecto/Backend/PF3311.TeleRehab.Api/bin/Debug/net10.0/Data/tele-rehab-data.json
