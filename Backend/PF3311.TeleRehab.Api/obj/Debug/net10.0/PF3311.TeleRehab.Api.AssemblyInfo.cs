@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PF3311.TeleRehab.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+eb919f4849d3491beb5c6975d717e9db7efee9a5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c88f9e2cedee95a342a8d4a7c85970c1a1678f93")]
 [assembly: System.Reflection.AssemblyProductAttribute("PF3311.TeleRehab.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PF3311.TeleRehab.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
