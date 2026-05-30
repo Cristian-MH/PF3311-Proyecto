@@ -8,7 +8,7 @@ on:
 env:
   AZURE_WEBAPP_NAME: pf3311
   DOTNET_VERSION: '8.0.x'
-  PROJECT_PATH: './TeleRehab.Api/TeleRehab.Api.csproj'
+  PROJECT_PATH: './Backend/PF3311.TeleRehab.Api/PF3311.TeleRehab.Api.csproj'
 
 jobs:
   build-and-deploy:
