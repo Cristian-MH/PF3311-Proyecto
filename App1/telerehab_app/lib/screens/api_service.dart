@@ -13,11 +13,25 @@ class ApiService {
     final response = await http.post(
       Uri.parse('$baseUrl/Patients'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(patient.toJson()),
+      body: jsonEncode(patient.toRegistrationJson()),
     );
 
     if (response.statusCode != 201) {
       throw Exception('Error creating patient: ${response.body}');
+    }
+
+    return Patient.fromJson(jsonDecode(response.body));
+  }
+
+  Future<Patient?> getPatient(String patientId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/Patients/$patientId'),
+    );
+
+    if (response.statusCode == 404) return null;
+
+    if (response.statusCode != 200) {
+      throw Exception('Error loading patient: ${response.body}');
     }
 
     return Patient.fromJson(jsonDecode(response.body));
@@ -30,6 +44,19 @@ class ApiService {
 
     if (response.statusCode != 200) {
       throw Exception('Error loading therapies: ${response.body}');
+    }
+
+    final List<dynamic> data = jsonDecode(response.body);
+    return data.map((item) => Therapy.fromJson(item)).toList();
+  }
+
+  Future<List<Therapy>> generateTherapies(String patientId) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/Therapies/generate/$patientId'),
+    );
+
+    if (response.statusCode != 201) {
+      throw Exception('Error generating therapies: ${response.body}');
     }
 
     final List<dynamic> data = jsonDecode(response.body);

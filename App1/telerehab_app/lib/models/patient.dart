@@ -26,13 +26,20 @@ class Patient {
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toRegistrationJson() {
     return {
       'fullName': fullName,
       'age': age,
       'sex': sex,
       'condition': condition,
       'technologyLevel': technologyLevel,
+    };
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      ...toRegistrationJson(),
     };
   }
 }

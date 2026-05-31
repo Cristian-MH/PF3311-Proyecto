@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../models/patient.dart';
 import '../screens/api_service.dart';
 import 'home_screen.dart';
+import 'patient_storage_service.dart';
 
 class PatientFormScreen extends StatefulWidget {
   const PatientFormScreen({super.key});
@@ -15,6 +16,7 @@ class PatientFormScreen extends StatefulWidget {
 class _PatientFormScreenState extends State<PatientFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _apiService = ApiService();
+  final _patientStorageService = PatientStorageService();
 
   final _nameController = TextEditingController();
   final _ageController = TextEditingController();
@@ -40,6 +42,8 @@ class _PatientFormScreenState extends State<PatientFormScreen> {
       );
 
       final createdPatient = await _apiService.createPatient(patient);
+      await _apiService.generateTherapies(createdPatient.id);
+      await _patientStorageService.savePatient(createdPatient);
 
       if (!mounted) return;
 
@@ -87,7 +91,19 @@ class _PatientFormScreenState extends State<PatientFormScreen> {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? const Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 20),
+                      Text(
+                        'Registrando paciente y generando su terapia personalizada...',
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                )
               : SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,

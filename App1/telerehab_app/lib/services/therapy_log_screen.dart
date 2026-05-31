@@ -27,11 +27,13 @@ class _TherapyLogScreenState extends State<TherapyLogScreen> {
   int _moodLevel = 3;
   int _painLevel = 3;
   bool _isSaving = false;
+  String? _feedbackMessage;
   String? _motivationMessage;
 
   Future<void> _saveLog() async {
     setState(() {
       _isSaving = true;
+      _feedbackMessage = null;
       _motivationMessage = null;
     });
 
@@ -47,20 +49,31 @@ class _TherapyLogScreenState extends State<TherapyLogScreen> {
 
       await _apiService.createTherapyLog(log);
 
-      final message = await _apiService.getMotivationMessage(
-        patientId: widget.patient.id,
-        therapyId: widget.therapy.id,
-      );
-
       if (!mounted) return;
 
       setState(() {
-        _motivationMessage = message;
+        _feedbackMessage = 'Tu avance fue registrado correctamente.';
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Registro guardado correctamente')),
-      );
+      try {
+        final message = await _apiService.getMotivationMessage(
+          patientId: widget.patient.id,
+          therapyId: widget.therapy.id,
+        );
+
+        if (!mounted) return;
+
+        setState(() {
+          _motivationMessage = message;
+        });
+      } catch (_) {
+        if (!mounted) return;
+
+        setState(() {
+          _motivationMessage =
+              'Tu avance cuenta. Continúa a tu ritmo y detente si el dolor aumenta.';
+        });
+      }
     } catch (e) {
       if (!mounted) return;
 
@@ -176,15 +189,38 @@ class _TherapyLogScreenState extends State<TherapyLogScreen> {
                 : const Icon(Icons.save),
             label: const Text('Guardar registro'),
           ),
+          if (_feedbackMessage != null) ...[
+            const SizedBox(height: 24),
+            Card(
+              color: Theme.of(context).colorScheme.secondaryContainer,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  _feedbackMessage!,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ),
+            ),
+          ],
           if (_motivationMessage != null) ...[
             const SizedBox(height: 24),
             Card(
               color: Theme.of(context).colorScheme.primaryContainer,
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Text(
-                  _motivationMessage!,
-                  style: Theme.of(context).textTheme.bodyLarge,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Mensaje motivacional',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _motivationMessage!,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ],
                 ),
               ),
             ),

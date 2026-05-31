@@ -46,6 +46,7 @@ Open the Swagger UI using the URL printed by the application, followed by
 | Method | Route | Purpose |
 | --- | --- | --- |
 | `POST` | `/api/patients` | Register a patient |
+| `GET` | `/api/patients/{patientId}` | Check whether a registered patient still exists |
 | `POST` | `/api/therapies/generate/{patientId}` | Generate and store 5 to 7 exercises with OpenAI |
 | `GET` | `/api/therapies/patient/{patientId}` | List a patient's exercises |
 | `POST` | `/api/therapylogs` | Register exercise progress |

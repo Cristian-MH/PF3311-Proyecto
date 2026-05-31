@@ -36,6 +36,19 @@ class _TherapiesScreenState extends State<TherapiesScreen> {
     await _therapiesFuture;
   }
 
+  Future<void> _generateTherapies() async {
+    try {
+      await _apiService.generateTherapies(widget.patient.id);
+      await _refresh();
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error generando terapias: $e')),
+      );
+    }
+  }
+
   void _goToLogScreen(Therapy therapy) {
     Navigator.push(
       context,
@@ -89,17 +102,23 @@ class _TherapiesScreenState extends State<TherapiesScreen> {
             if (therapies.isEmpty) {
               return ListView(
                 padding: const EdgeInsets.all(16),
-                children: const [
-                  Icon(Icons.info_outline, size: 48),
-                  SizedBox(height: 16),
-                  Text(
+                children: [
+                  const Icon(Icons.info_outline, size: 48),
+                  const SizedBox(height: 16),
+                  const Text(
                     'No hay terapias asignadas para este paciente.',
                     textAlign: TextAlign.center,
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    'La terapia inicial se genera automáticamente después del registro. Intente refrescar la pantalla.',
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Puede intentar generar nuevamente el plan personalizado.',
                     textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: _generateTherapies,
+                    icon: const Icon(Icons.auto_awesome),
+                    label: const Text('Generar terapias'),
                   ),
                 ],
               );

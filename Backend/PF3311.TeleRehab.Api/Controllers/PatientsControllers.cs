@@ -15,6 +15,17 @@ public class PatientsController : ControllerBase
         _database = database;
     }
 
+    [HttpGet("{id:guid}")]
+    public IActionResult GetById(Guid id)
+    {
+        var patient = _database.Patients.FirstOrDefault(patient => patient.Id == id);
+
+        if (patient is null)
+            return NotFound(new { message = "Patient not found." });
+
+        return Ok(patient);
+    }
+
     [HttpPost]
     public IActionResult Create([FromBody] Patient patient)
     {

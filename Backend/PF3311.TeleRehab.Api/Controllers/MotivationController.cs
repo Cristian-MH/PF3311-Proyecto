@@ -9,10 +9,14 @@ namespace PF3311.Telerehab.API.Controllers;
 public class MotivationController : ControllerBase
 {
     private readonly MotivationService _motivationService;
+    private readonly ILogger<MotivationController> _logger;
 
-    public MotivationController(MotivationService motivationService)
+    public MotivationController(
+        MotivationService motivationService,
+        ILogger<MotivationController> logger)
     {
         _motivationService = motivationService;
+        _logger = logger;
     }
 
     [HttpPost("message")]
@@ -35,14 +39,23 @@ public class MotivationController : ControllerBase
         }
         catch (OpenAiConfigurationException exception)
         {
-            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = exception.Message });
+            _logger.LogWarning(exception, "OpenAI is not configured. Using fallback motivation message.");
+
+            return Ok(new
+            {
+                message = _motivationService.GenerateFallbackMessage(request),
+                generatedByAi = false
+            });
         }
         catch (Exception exception) when (
             exception is HttpRequestException or OpenAiMotivationGenerationException)
         {
-            return StatusCode(StatusCodes.Status502BadGateway, new
+            _logger.LogWarning(exception, "OpenAI motivation generation failed. Using fallback message.");
+
+            return Ok(new
             {
-                message = "OpenAI could not generate the motivation message."
+                message = _motivationService.GenerateFallbackMessage(request),
+                generatedByAi = false
             });
         }
     }

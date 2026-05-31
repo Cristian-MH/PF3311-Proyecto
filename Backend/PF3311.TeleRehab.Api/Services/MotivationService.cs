@@ -32,17 +32,11 @@ public class MotivationService
         MotivationRequest request,
         CancellationToken cancellationToken)
     {
+        var (patient, therapy, recentLogs) = GetContext(request);
+
         if (string.IsNullOrWhiteSpace(_apiKey))
             throw new OpenAiConfigurationException("OpenAI:ApiKey is not configured.");
 
-        var patient = _database.Patients.FirstOrDefault(patient => patient.Id == request.PatientId)
-            ?? throw new MotivationContextNotFoundException("Patient not found.");
-        var therapy = _database.Therapies.FirstOrDefault(therapy => therapy.Id == request.TherapyId);
-
-        if (therapy is null || therapy.PatientId != patient.Id)
-            throw new MotivationContextNotFoundException("Therapy not found for this patient.");
-
-        var recentLogs = _database.GetRecentTherapyLogs(patient.Id);
         var requestBody = new
         {
             model = _model,
@@ -94,6 +88,49 @@ public class MotivationService
             throw new HttpRequestException($"OpenAI returned HTTP {(int)response.StatusCode}.");
 
         return ExtractOutputText(responseJson);
+    }
+
+    public string GenerateFallbackMessage(MotivationRequest request)
+    {
+        var (patient, therapy, recentLogs) = GetContext(request);
+        var latestLog = recentLogs.FirstOrDefault();
+
+        if (latestLog is null)
+            return $"{patient.FullName}, sigue avanzando con {therapy.Name}. Cada sesión cuenta.";
+
+        if (latestLog.PainLevel >= 4)
+        {
+            return $"{patient.FullName}, tu avance en {therapy.Name} quedó registrado. "
+                + "Como indicaste dolor elevado, pausa el ejercicio y comunícate con tu profesional de salud.";
+        }
+
+        if (!latestLog.Completed)
+        {
+            return $"{patient.FullName}, tu esfuerzo con {therapy.Name} también cuenta. "
+                + "Avanza poco a poco y retoma la sesión cuando te sientas preparado.";
+        }
+
+        if (latestLog.MoodLevel <= 2)
+        {
+            return $"{patient.FullName}, completaste {therapy.Name} incluso en un día difícil. "
+                + "Reconoce ese avance y continúa a tu ritmo.";
+        }
+
+        return $"{patient.FullName}, completaste {therapy.Name}. "
+            + "Muy buen trabajo: cada sesión registrada suma a tu proceso de rehabilitación.";
+    }
+
+    private (Patient Patient, Therapy Therapy, IReadOnlyList<TherapyLog> RecentLogs) GetContext(
+        MotivationRequest request)
+    {
+        var patient = _database.Patients.FirstOrDefault(patient => patient.Id == request.PatientId)
+            ?? throw new MotivationContextNotFoundException("Patient not found.");
+        var therapy = _database.Therapies.FirstOrDefault(therapy => therapy.Id == request.TherapyId);
+
+        if (therapy is null || therapy.PatientId != patient.Id)
+            throw new MotivationContextNotFoundException("Therapy not found for this patient.");
+
+        return (patient, therapy, _database.GetRecentTherapyLogs(patient.Id));
     }
 
     private static string ExtractOutputText(string responseJson)

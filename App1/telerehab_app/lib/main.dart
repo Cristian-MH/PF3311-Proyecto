@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'services/patient_form_screen.dart';
+import 'services/startup_screen.dart';
 
 void main() {
   runApp(const TeleRehabTextApp());
@@ -36,7 +36,7 @@ class TeleRehabTextApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const PatientFormScreen(),
+      home: const StartupScreen(),
     );
   }
 }
