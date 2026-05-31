@@ -74,6 +74,7 @@ DataStore__FilePath=/home/data/tele-rehab-data.json
 DataStore__ItemLifetimeHours=1
 OpenAI__ApiKey=<your-api-key>
 OpenAI__Model=gpt-5.4-mini
+ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
 ```
 
 For a Linux custom container, also configure:
