@@ -27,14 +27,10 @@ class _TherapyLogScreenState extends State<TherapyLogScreen> {
   int _moodLevel = 3;
   int _painLevel = 3;
   bool _isSaving = false;
-  String? _feedbackMessage;
-  String? _motivationMessage;
 
   Future<void> _saveLog() async {
     setState(() {
       _isSaving = true;
-      _feedbackMessage = null;
-      _motivationMessage = null;
     });
 
     try {
@@ -51,29 +47,20 @@ class _TherapyLogScreenState extends State<TherapyLogScreen> {
 
       if (!mounted) return;
 
-      setState(() {
-        _feedbackMessage = 'Tu avance fue registrado correctamente.';
-      });
-
+      late final String motivationMessage;
       try {
-        final message = await _apiService.getMotivationMessage(
+        motivationMessage = await _apiService.getMotivationMessage(
           patientId: widget.patient.id,
           therapyId: widget.therapy.id,
         );
-
-        if (!mounted) return;
-
-        setState(() {
-          _motivationMessage = message;
-        });
       } catch (_) {
-        if (!mounted) return;
-
-        setState(() {
-          _motivationMessage =
-              'Tu avance cuenta. Continúa a tu ritmo y detente si el dolor aumenta.';
-        });
+        motivationMessage =
+            'Tu avance cuenta. Continúa a tu ritmo y detente si el dolor aumenta.';
       }
+
+      if (!mounted) return;
+
+      await _showMotivationDialog(motivationMessage);
     } catch (e) {
       if (!mounted) return;
 
@@ -85,6 +72,70 @@ class _TherapyLogScreenState extends State<TherapyLogScreen> {
         setState(() => _isSaving = false);
       }
     }
+  }
+
+  Future<void> _showMotivationDialog(String message) async {
+    final hasHighPain = _painLevel >= 4;
+    final title = hasHighPain
+        ? 'Cuida tu bienestar'
+        : _completed
+            ? '¡Excelente trabajo!'
+            : 'Cada esfuerzo cuenta';
+    final face = hasHighPain
+        ? '😌'
+        : _completed
+            ? '😊'
+            : '🙂';
+    final color = hasHighPain
+        ? Colors.orange
+        : _completed
+            ? Colors.green
+            : Colors.indigo;
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: color.shade50,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          title: Column(
+            children: [
+              Text(
+                face,
+                style: const TextStyle(fontSize: 56),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: color.shade800,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            message,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            FilledButton.icon(
+              onPressed: () => Navigator.pop(context),
+              style: FilledButton.styleFrom(
+                backgroundColor: color.shade700,
+              ),
+              icon: const Icon(Icons.favorite),
+              label: const Text('Continuar'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -187,44 +238,12 @@ class _TherapyLogScreenState extends State<TherapyLogScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.save),
-            label: const Text('Guardar registro'),
+            label: Text(
+              _isSaving
+                  ? 'Guardando y preparando mensaje...'
+                  : 'Guardar registro',
+            ),
           ),
-          if (_feedbackMessage != null) ...[
-            const SizedBox(height: 24),
-            Card(
-              color: Theme.of(context).colorScheme.secondaryContainer,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  _feedbackMessage!,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              ),
-            ),
-          ],
-          if (_motivationMessage != null) ...[
-            const SizedBox(height: 24),
-            Card(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Mensaje motivacional',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _motivationMessage!,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );
