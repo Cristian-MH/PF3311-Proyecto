@@ -1,5 +1,4 @@
-# PF-3311 Sistemas de Información: Agentes
-Virtuales Inteligentes
+# PF-3311 Sistemas de Información: Agentes Virtuales Inteligentes
 
 Prueba de concepto desarrollada para el curso **PF-3311 Sistemas de
 Información: Agentes Virtuales Inteligentes**.
