@@ -103,13 +103,12 @@ class _AgentMotivationScreenState extends State<AgentMotivationScreen>
   }
 
   String get _avatarProfile {
-    if (widget.patient.age >= 60) return 'professional_health';
+    if (widget.patient.age < 30) return 'young_adult_support';
+    if (widget.patient.age >= 60) return 'older_adult_support';
     if (widget.patient.technologyLevel.toLowerCase() == 'low') {
       return 'neutral_support';
     }
-    if (widget.patient.sex.toUpperCase() == 'F') return 'friendly_female';
-    if (widget.patient.sex.toUpperCase() == 'M') return 'friendly_male';
-    return 'neutral_support';
+    return 'adult_support';
   }
 
   String get _emotion {

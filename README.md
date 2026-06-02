@@ -60,7 +60,7 @@ latencia.
 - **LLM:** OpenAI Responses API con el modelo configurable
   `gpt-5.4-mini`.
 - **Motor visual de App2:** Unity `2022.3.62f3`, integrado en Flutter mediante
-  `flutter_embed_unity`. App1 utiliza únicamente texto.
+  `flutter_embed_unity`. RehaClassic (App1) utiliza únicamente texto.
 - **Voz de App2:** Azure Speech para síntesis de voz TTS en español de Costa
   Rica.
 - **Avatares y animaciones de App2:** recursos obtenidos de Mixamo e integrados
@@ -87,7 +87,7 @@ síntesis de voz con Azure Speech.
 
 | Variante | Ubicación | Experiencia |
 | --- | --- | --- |
-| App1 | `App1/telerehab_app/` | Aplicación convencional. Presenta los mensajes motivacionales únicamente como texto. |
+| RehaClassic (App1) | `App1/telerehab_app/` | Aplicación convencional. Presenta los mensajes motivacionales únicamente como texto. |
 | App2 | `App2/telerehab_app/` | Aplicación asistida por agente virtual. Integra avatares y animaciones de Mixamo mediante Unity, además de la modalidad con voz. |
 
 > Esta PoC es únicamente para fines académicos y demostrativos. No debe usarse
@@ -111,7 +111,7 @@ síntesis de voz con Azure Speech.
 
 ```text
 PF3311-Proyecto/
-|-- App1/telerehab_app/             # App convencional basada en texto
+|-- App1/telerehab_app/             # RehaClassic: app convencional basada en texto
 |-- App2/telerehab_app/             # App asistida con avatar Unity y voz
 |-- Backend/PF3311.TeleRehab.Api/   # API ASP.NET Core
 |-- TeleRehabAvatarUnity/           # Proyecto Unity del avatar
@@ -165,7 +165,7 @@ AzureSpeech__MaleVoiceName=es-CR-JuanNeural
 AzureSpeech__FemaleVoiceName=es-CR-MariaNeural
 ```
 
-### 2. Ejecutar App1: experiencia convencional con texto
+### 2. Ejecutar RehaClassic (App1): experiencia convencional con texto
 
 ```bash
 cd App1/telerehab_app

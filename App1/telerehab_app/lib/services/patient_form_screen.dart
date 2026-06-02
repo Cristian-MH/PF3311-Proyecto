@@ -83,7 +83,7 @@ class _PatientFormScreenState extends State<PatientFormScreen> {
           children: const [
             Icon(Icons.health_and_safety),
             SizedBox(width: 10),
-            Text('TeleRehab'),
+            Text('RehaClassic'),
           ],
         ),
       ),
@@ -132,7 +132,7 @@ class _PatientFormScreenState extends State<PatientFormScreen> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          'TeleRehab',
+                                          'RehaClassic',
                                           style: Theme.of(context).textTheme.titleLarge,
                                         ),
                                         const SizedBox(height: 6),

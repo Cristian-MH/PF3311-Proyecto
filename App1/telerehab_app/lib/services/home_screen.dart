@@ -22,7 +22,7 @@ class HomeScreen extends StatelessWidget {
           children: const [
             Icon(Icons.health_and_safety),
             SizedBox(width: 8),
-            Text('TeleRehab'),
+            Text('RehaClassic'),
           ],
         ),
       ),

@@ -13,6 +13,21 @@ public class SpeechController : MonoBehaviour
     [SerializeField]
     private AudioSource audioSource;
 
+    private void Awake()
+    {
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+        }
+
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        audioSource.playOnAwake = false;
+    }
+
     public void Speak(string message, string sex)
     {
         if (string.IsNullOrWhiteSpace(message))
@@ -48,7 +63,7 @@ public class SpeechController : MonoBehaviour
         webRequest.SetRequestHeader("Content-Type", "application/json");
         webRequest.SetRequestHeader("Accept", "*/*");
 
-        Debug.Log($"Requesting TTS audio. Sex: {sex}");
+        Debug.Log($"Requesting TTS audio from {url}. Sex: {sex}");
         Debug.Log(body);
 
         yield return webRequest.SendWebRequest();

@@ -51,6 +51,8 @@ dev_dependencies:
   flutter_lints: ^6.0.0
 
 dependency_overrides:
+  flutter_embed_unity_2022_3_android:
+    path: third_party/flutter_embed_unity_2022_3_android
   shared_preferences_android:
     path: third_party/shared_preferences_android
 

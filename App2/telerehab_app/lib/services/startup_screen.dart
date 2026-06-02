@@ -18,6 +18,7 @@ class _StartupScreenState extends State<StartupScreen> {
   final _patientStorageService = PatientStorageService();
 
   bool _hasConnectionError = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -26,18 +27,23 @@ class _StartupScreenState extends State<StartupScreen> {
   }
 
   Future<void> _loadPatient() async {
-    setState(() => _hasConnectionError = false);
-
-    final storedPatient = await _patientStorageService.loadPatient();
-
-    if (!mounted) return;
-
-    if (storedPatient == null) {
-      _open(const PatientFormScreen());
-      return;
-    }
+    if (_isLoading) return;
 
     try {
+      setState(() {
+        _hasConnectionError = false;
+        _isLoading = true;
+      });
+
+      final storedPatient = await _patientStorageService.loadPatient();
+
+      if (!mounted) return;
+
+      if (storedPatient == null) {
+        _open(const PatientFormScreen());
+        return;
+      }
+
       final patient = await _apiService.getPatient(storedPatient.id);
 
       if (!mounted) return;
@@ -60,6 +66,10 @@ class _StartupScreenState extends State<StartupScreen> {
       if (!mounted) return;
 
       setState(() => _hasConnectionError = true);
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -84,7 +94,8 @@ class _StartupScreenState extends State<StartupScreen> {
                     const Icon(Icons.cloud_off, size: 48, color: Colors.white),
                     const SizedBox(height: 16),
                     const Text(
-                      'No fue posible verificar el registro del paciente.',
+                      'No fue posible preparar la aplicación. Verifica tu '
+                      'conexión e inténtalo nuevamente.',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.white),
                     ),

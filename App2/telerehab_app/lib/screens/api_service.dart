@@ -8,13 +8,14 @@ import '../models/therapy_log.dart';
 class ApiService {
   static const String baseUrl =
       'https://pf3311-azf3h8a2a3gqcbeh.eastus2-01.azurewebsites.net/api';
+  static const Duration _requestTimeout = Duration(seconds: 30);
 
   Future<Patient> createPatient(Patient patient) async {
     final response = await http.post(
       Uri.parse('$baseUrl/Patients'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(patient.toRegistrationJson()),
-    );
+    ).timeout(_requestTimeout);
 
     if (response.statusCode != 201) {
       throw Exception('Error creating patient: ${response.body}');
@@ -26,7 +27,7 @@ class ApiService {
   Future<Patient?> getPatient(String patientId) async {
     final response = await http.get(
       Uri.parse('$baseUrl/Patients/$patientId'),
-    );
+    ).timeout(_requestTimeout);
 
     if (response.statusCode == 404) return null;
 
@@ -40,7 +41,7 @@ class ApiService {
   Future<List<Therapy>> getTherapiesByPatient(String patientId) async {
     final response = await http.get(
       Uri.parse('$baseUrl/Therapies/patient/$patientId'),
-    );
+    ).timeout(_requestTimeout);
 
     if (response.statusCode != 200) {
       throw Exception('Error loading therapies: ${response.body}');
@@ -53,7 +54,7 @@ class ApiService {
   Future<List<Therapy>> generateTherapies(String patientId) async {
     final response = await http.post(
       Uri.parse('$baseUrl/Therapies/generate/$patientId'),
-    );
+    ).timeout(_requestTimeout);
 
     if (response.statusCode != 201) {
       throw Exception('Error generating therapies: ${response.body}');
@@ -68,7 +69,7 @@ class ApiService {
       Uri.parse('$baseUrl/TherapyLogs'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(log.toJson()),
-    );
+    ).timeout(_requestTimeout);
 
     if (response.statusCode != 201) {
       throw Exception('Error creating therapy log: ${response.body}');
@@ -86,7 +87,7 @@ class ApiService {
         'patientId': patientId,
         'therapyId': therapyId,
       }),
-    );
+    ).timeout(_requestTimeout);
 
     if (response.statusCode != 200) {
       throw Exception('Error generating motivation message: ${response.body}');

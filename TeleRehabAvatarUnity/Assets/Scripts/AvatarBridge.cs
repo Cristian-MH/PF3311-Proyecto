@@ -23,14 +23,36 @@ public class AvatarBridge : MonoBehaviour
     [SerializeField] private SpeechController speechController;
 
     private string currentAvatarSex = "F";
+    private string lastSpokenMessage = string.Empty;
+    private float lastSpeechTime = float.NegativeInfinity;
+    private const float DuplicateSpeechWindowSeconds = 3f;
 
     private void Awake()
     {
+        EnsureSpeechController();
         DisableAllAvatars();
 
         if (messageText != null)
         {
             messageText.text = "Cargando perfil del paciente...";
+        }
+    }
+
+    private void EnsureSpeechController()
+    {
+        if (speechController != null)
+            return;
+
+        speechController = GetComponent<SpeechController>();
+
+        if (speechController == null)
+        {
+            speechController = FindObjectOfType<SpeechController>();
+        }
+
+        if (speechController == null)
+        {
+            speechController = gameObject.AddComponent<SpeechController>();
         }
     }
 
@@ -69,10 +91,7 @@ public class AvatarBridge : MonoBehaviour
         ApplyEmotion(emotion);
         PlayAnimation(animation);
 
-        if (speechController != null && !string.IsNullOrWhiteSpace(message))
-        {
-            speechController.Speak(message, currentAvatarSex);
-        }
+        SpeakIfNeeded(message);
     }
 
     public void ReceiveMessage(string json)
@@ -95,10 +114,23 @@ public class AvatarBridge : MonoBehaviour
         ApplyEmotion(data.emotion);
         PlayAnimation(data.animation);
 
-        if (speechController != null && !string.IsNullOrWhiteSpace(data.message))
-        {
-            speechController.Speak(data.message, currentAvatarSex);
-        }
+        SpeakIfNeeded(data.message);
+    }
+
+    private void SpeakIfNeeded(string message)
+    {
+        if (speechController == null || string.IsNullOrWhiteSpace(message))
+            return;
+
+        bool isDuplicate = message == lastSpokenMessage &&
+            Time.realtimeSinceStartup - lastSpeechTime < DuplicateSpeechWindowSeconds;
+
+        if (isDuplicate)
+            return;
+
+        lastSpokenMessage = message;
+        lastSpeechTime = Time.realtimeSinceStartup;
+        speechController.Speak(message, currentAvatarSex);
     }
 
     private string ResolveAvatarProfile(PatientContextMessage context)

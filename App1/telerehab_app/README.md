@@ -1,6 +1,7 @@
-# Telerehab App
+# RehaClassic
 
-A Flutter-based telerehabilitation application for managing patients, therapies, and therapy logs.
+A Flutter-based conventional telerehabilitation application for managing
+patients, therapies, and therapy logs through a text-only experience.
 
 ## Project Overview
 

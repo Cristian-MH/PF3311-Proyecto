@@ -89,10 +89,9 @@ packages:
   flutter_embed_unity_2022_3_android:
     dependency: "direct main"
     description:
-      name: flutter_embed_unity_2022_3_android
-      sha256: "896e4e3acdbb8067979a6fdec85c54e025329fb12d600a40bf1bc1036277eb70"
-      url: "https://pub.dev"
-    source: hosted
+      path: "third_party/flutter_embed_unity_2022_3_android"
+      relative: true
+    source: path
     version: "2.0.0"
   flutter_embed_unity_2022_3_ios:
     dependency: transitive

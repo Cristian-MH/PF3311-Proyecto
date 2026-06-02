@@ -1,11 +1,11 @@
 {
-    "name": "telerehab_app",
-    "short_name": "telerehab_app",
+    "name": "RehaClassic",
+    "short_name": "RehaClassic",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Experiencia convencional de telerehabilitación basada en texto.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
