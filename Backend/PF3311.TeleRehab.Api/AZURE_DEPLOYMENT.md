@@ -14,6 +14,10 @@ Configure these application settings in Azure:
 | `DataStore__ItemLifetimeHours` | `1` |
 | `OpenAI__ApiKey` | Your OpenAI API key |
 | `OpenAI__Model` | `gpt-5.4-mini` |
+| `AzureSpeech__Key` | Your Azure Speech key |
+| `AzureSpeech__Region` | `eastus` |
+| `AzureSpeech__MaleVoiceName` | `es-CR-JuanNeural` |
+| `AzureSpeech__FemaleVoiceName` | `es-CR-MariaNeural` |
 | `ASPNETCORE_FORWARDEDHEADERS_ENABLED` | `true` |
 
 For a Linux custom container, also configure:

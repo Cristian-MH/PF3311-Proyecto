@@ -32,4 +32,14 @@ Content-Type: application/json
   "patientId": "{{patientId}}",
   "therapyId": "{{therapyId}}"
 }
+
+###
+
+POST {{PF3311.TeleRehab.Api_HostAddress}}/api/speech/synthesize
+Content-Type: application/json
+
+{
+  "text": "Recuerda realizar el ejercicio lentamente y detenerte si sientes dolor.",
+  "sex": "M"
+}
 ###

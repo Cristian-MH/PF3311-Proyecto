@@ -10,6 +10,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<InMemoryDatabase>();
 builder.Services.AddHttpClient<MotivationService>();
 builder.Services.AddHttpClient<OpenAiTherapyService>();
+builder.Services.AddHttpClient<SpeechService>();
 
 var app = builder.Build();
 

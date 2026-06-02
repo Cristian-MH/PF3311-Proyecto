@@ -51,6 +51,7 @@ Open the Swagger UI using the URL printed by the application, followed by
 | `GET` | `/api/therapies/patient/{patientId}` | List a patient's exercises |
 | `POST` | `/api/therapylogs` | Register exercise progress |
 | `POST` | `/api/motivation/message` | Generate a personalized motivation message with OpenAI |
+| `POST` | `/api/speech/synthesize` | Generate an MP3 message with Azure Speech |
 
 The OpenAI request sends only the age, sex, condition, and technology level
 needed to generate the plan. It uses the Responses API with Structured Outputs
@@ -62,6 +63,11 @@ Motivation messages are also generated with OpenAI and `store: false`. The
 client sends only the patient and therapy IDs. The API builds the personalized
 context from the stored patient record, exercise, and five most recent progress
 logs.
+
+Speech synthesis uses Azure Speech and returns an MP3 file. Send `text` and the
+patient's `sex` (`M` or `F`) to `/api/speech/synthesize`. The API selects
+`es-CR-JuanNeural` for `M` and `es-CR-MariaNeural` for `F`. Keep the text free
+of personal or medical details unless they are strictly necessary.
 
 ## Azure Deployment With Zero Cost
 
@@ -75,6 +81,10 @@ DataStore__FilePath=/home/data/tele-rehab-data.json
 DataStore__ItemLifetimeHours=1
 OpenAI__ApiKey=<your-api-key>
 OpenAI__Model=gpt-5.4-mini
+AzureSpeech__Key=<your-speech-key>
+AzureSpeech__Region=eastus
+AzureSpeech__MaleVoiceName=es-CR-JuanNeural
+AzureSpeech__FemaleVoiceName=es-CR-MariaNeural
 ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
 ```
 
