@@ -3,6 +3,9 @@ using TMPro;
 
 public class AvatarBridge : MonoBehaviour
 {
+    [Header("Avatar Root")]
+    [SerializeField] private Transform avatarRoot;
+
     [Header("Avatar Profiles")]
     [SerializeField] private GameObject youngAdultAvatar;
     [SerializeField] private GameObject adultAvatar;
@@ -16,13 +19,59 @@ public class AvatarBridge : MonoBehaviour
     [Header("UI References")]
     [SerializeField] private TMP_Text messageText;
 
-        private void Awake()
+    [Header("Speech")]
+    [SerializeField] private SpeechController speechController;
+
+    private string currentAvatarSex = "F";
+
+    private void Awake()
     {
         DisableAllAvatars();
 
         if (messageText != null)
         {
             messageText.text = "Cargando perfil del paciente...";
+        }
+    }
+
+    public void ApplyPatientContext(string json)
+    {
+        Debug.Log("Applying patient context:");
+        Debug.Log(json);
+
+        PatientContextMessage context = JsonUtility.FromJson<PatientContextMessage>(json);
+
+        string avatarProfile = ResolveAvatarProfile(context);
+
+        Debug.Log($"Loading avatar before backend call: {avatarProfile}");
+
+        ApplyAvatarProfile(avatarProfile);
+        ApplyContextScale(context);
+    }
+
+    public void ShowLoadingOnCurrentAvatar(string message, string animation)
+    {
+        if (messageText != null)
+        {
+            messageText.text = message;
+        }
+
+        PlayAnimation(animation);
+    }
+
+    public void ShowMessageOnCurrentAvatar(string message, string emotion, string animation)
+    {
+        if (messageText != null)
+        {
+            messageText.text = message;
+        }
+
+        ApplyEmotion(emotion);
+        PlayAnimation(animation);
+
+        if (speechController != null && !string.IsNullOrWhiteSpace(message))
+        {
+            speechController.Speak(message, currentAvatarSex);
         }
     }
 
@@ -45,22 +94,12 @@ public class AvatarBridge : MonoBehaviour
 
         ApplyEmotion(data.emotion);
         PlayAnimation(data.animation);
+
+        if (speechController != null && !string.IsNullOrWhiteSpace(data.message))
+        {
+            speechController.Speak(data.message, currentAvatarSex);
+        }
     }
-
-public void ApplyPatientContext(string json)
-{
-    Debug.Log("Applying patient context:");
-    Debug.Log(json);
-
-    PatientContextMessage context = JsonUtility.FromJson<PatientContextMessage>(json);
-
-    string avatarProfile = ResolveAvatarProfile(context);
-
-    Debug.Log($"Loading avatar before backend call: {avatarProfile}");
-
-    ApplyAvatarProfile(avatarProfile);
-    ApplyContextScale(context);
-}
 
     private string ResolveAvatarProfile(PatientContextMessage context)
     {
@@ -93,19 +132,23 @@ public void ApplyPatientContext(string json)
         {
             case "young_adult_support":
                 activeAvatar = youngAdultAvatar != null ? youngAdultAvatar : neutralSupportAvatar;
+                currentAvatarSex = "M"; 
                 break;
 
             case "older_adult_support":
                 activeAvatar = olderAdultAvatar != null ? olderAdultAvatar : neutralSupportAvatar;
+                currentAvatarSex = "M"; // Tu OlderAdultAvatar es el médico masculino.
                 break;
 
             case "adult_support":
                 activeAvatar = adultAvatar != null ? adultAvatar : neutralSupportAvatar;
+                currentAvatarSex = "F"; // AdultAvatar es mujer.
                 break;
 
             case "neutral_support":
             default:
                 activeAvatar = neutralSupportAvatar;
+                currentAvatarSex = "F"; // NeutralSupportAvatar es mujer.
                 break;
         }
 
@@ -117,6 +160,9 @@ public void ApplyPatientContext(string json)
 
         activeAvatar.SetActive(true);
 
+        Debug.Log($"Active avatar GameObject: {activeAvatar.name}");
+        Debug.Log($"Current avatar sex for TTS: {currentAvatarSex}");
+
         animator = activeAvatar.GetComponent<Animator>();
 
         if (animator == null)
@@ -127,10 +173,21 @@ public void ApplyPatientContext(string json)
 
     private void DisableAllAvatars()
     {
+        if (avatarRoot != null)
+        {
+            foreach (Transform child in avatarRoot)
+            {
+                child.gameObject.SetActive(false);
+            }
+        }
+
         if (youngAdultAvatar != null) youngAdultAvatar.SetActive(false);
         if (adultAvatar != null) adultAvatar.SetActive(false);
         if (olderAdultAvatar != null) olderAdultAvatar.SetActive(false);
         if (neutralSupportAvatar != null) neutralSupportAvatar.SetActive(false);
+
+        activeAvatar = null;
+        animator = null;
     }
 
     private void ApplyContextScale(PatientContextMessage context)
@@ -151,13 +208,6 @@ public void ApplyPatientContext(string json)
     private void ApplyEmotion(string emotion)
     {
         Debug.Log($"Applying emotion: {emotion}");
-
-        // For humanoid avatars, emotion should be represented mainly through:
-        // - animation
-        // - facial blendshapes later
-        // - voice style later
-        //
-        // We do not change material color here because humanoid models have multiple renderers/materials.
     }
 
     private void PlayAnimation(string animationName)
@@ -182,17 +232,6 @@ public void ApplyPatientContext(string json)
 
         animator.SetTrigger(animationName);
     }
-
-    public void ShowMessageOnCurrentAvatar(string message, string emotion, string animation)
-{
-    if (messageText != null)
-    {
-        messageText.text = message;
-    }
-
-    ApplyEmotion(emotion);
-    PlayAnimation(animation);
-}
 }
 
 [System.Serializable]
