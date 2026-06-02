@@ -63,6 +63,8 @@ latencia.
   `flutter_embed_unity`. App1 utiliza únicamente texto.
 - **Voz de App2:** Azure Speech para síntesis de voz TTS en español de Costa
   Rica.
+- **Avatares y animaciones de App2:** recursos obtenidos de Mixamo e integrados
+  en Unity.
 - **Persistencia de la PoC:** almacenamiento temporal en memoria respaldado por
   un archivo JSON y preferencias locales mediante `shared_preferences`.
 - **Despliegue:** Azure App Service.
@@ -86,7 +88,7 @@ síntesis de voz con Azure Speech.
 | Variante | Ubicación | Experiencia |
 | --- | --- | --- |
 | App1 | `App1/telerehab_app/` | Aplicación convencional. Presenta los mensajes motivacionales únicamente como texto. |
-| App2 | `App2/telerehab_app/` | Aplicación asistida por agente virtual. Integra el avatar Unity y la modalidad con voz. |
+| App2 | `App2/telerehab_app/` | Aplicación asistida por agente virtual. Integra avatares y animaciones de Mixamo mediante Unity, además de la modalidad con voz. |
 
 > Esta PoC es únicamente para fines académicos y demostrativos. No debe usarse
 > para almacenar expedientes médicos reales ni para sustituir el criterio de un
@@ -98,7 +100,8 @@ síntesis de voz con Azure Speech.
 - Generación de ejercicios de rehabilitación con OpenAI.
 - Registro del progreso, estado de ánimo y nivel de dolor de cada sesión.
 - Mensajes motivacionales personalizados con una respuesta local de respaldo.
-- Avatar Unity embebido en la experiencia Flutter asistida de App2.
+- Avatares y animaciones de Mixamo integrados en Unity y embebidos en la
+  experiencia Flutter asistida de App2.
 - Síntesis de voz para App2 con Azure Speech en español de Costa Rica:
   - `M`: `es-CR-JuanNeural`.
   - `F`: `es-CR-MariaNeural`.
