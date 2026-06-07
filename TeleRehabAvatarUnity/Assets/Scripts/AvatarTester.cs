@@ -4,10 +4,13 @@ using UnityEngine;
 public class AvatarTester : MonoBehaviour
 {
     [SerializeField] private MotivationApiClient motivationApiClient;
+    [SerializeField] private SpeechController speechController;
 
     [Header("Test timing")]
     [SerializeField] private float initialDelay = 2f;
-    [SerializeField] private float delayBetweenTests = 10f;
+    [SerializeField] private float safetyTimeout = 60f;
+
+    private bool interactionFinished;
 
     private void Start()
     {
@@ -18,20 +21,57 @@ public class AvatarTester : MonoBehaviour
     {
         yield return new WaitForSeconds(initialDelay);
 
-        Debug.Log("=== TEST 1: AdultAvatar ===");
-        TestAdultPatient();
-        yield return new WaitForSeconds(delayBetweenTests);
+        yield return RunSingleTest("=== TEST 1: AdultAvatar ===", TestAdultPatient);
+        yield return RunSingleTest("=== TEST 2: YoungAdultAvatar ===", TestYoungPatient);
+        yield return RunSingleTest("=== TEST 3: OlderAdultAvatar ===", TestOlderPatient);
+        yield return RunSingleTest("=== TEST 4: NeutralSupportAvatar ===", TestLowTechPatient);
 
-        Debug.Log("=== TEST 2: YoungAdultAvatar ===");
-        TestYoungPatient();
-        yield return new WaitForSeconds(delayBetweenTests);
+        Debug.Log("=== ALL TEST CASES COMPLETED ===");
+    }
 
-        Debug.Log("=== TEST 3: OlderAdultAvatar ===");
-        TestOlderPatient();
-        yield return new WaitForSeconds(delayBetweenTests);
+    private IEnumerator RunSingleTest(string testName, System.Action testAction)
+    {
+        Debug.Log(testName);
 
-        Debug.Log("=== TEST 4: NeutralSupportAvatar ===");
-        TestLowTechPatient();
+        interactionFinished = false;
+
+        if (speechController != null)
+        {
+            speechController.OnFullInteractionCompleted -= HandleInteractionCompleted;
+            speechController.OnFullInteractionCompleted += HandleInteractionCompleted;
+        }
+        else
+        {
+            Debug.LogWarning("SpeechController is not assigned in AvatarTester.");
+        }
+
+        testAction.Invoke();
+
+        float elapsed = 0f;
+
+        while (!interactionFinished && elapsed < safetyTimeout)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        if (!interactionFinished)
+        {
+            Debug.LogWarning($"Test finished by timeout: {testName}");
+        }
+
+        if (speechController != null)
+        {
+            speechController.OnFullInteractionCompleted -= HandleInteractionCompleted;
+        }
+
+        yield return new WaitForSeconds(1.5f);
+    }
+
+    private void HandleInteractionCompleted()
+    {
+        Debug.Log("Interaction completed. Moving to next test.");
+        interactionFinished = true;
     }
 
     private void TestAdultPatient()

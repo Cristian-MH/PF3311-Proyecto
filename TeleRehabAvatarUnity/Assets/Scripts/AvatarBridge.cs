@@ -12,6 +12,9 @@ public class AvatarBridge : MonoBehaviour
     [SerializeField] private GameObject olderAdultAvatar;
     [SerializeField] private GameObject neutralSupportAvatar;
 
+    [Header("Speech")]
+    [SerializeField] private SpeechController speechController;
+
     [Header("Runtime Avatar")]
     [SerializeField] private GameObject activeAvatar;
     [SerializeField] private Animator animator;
@@ -19,40 +22,15 @@ public class AvatarBridge : MonoBehaviour
     [Header("UI References")]
     [SerializeField] private TMP_Text messageText;
 
-    [Header("Speech")]
-    [SerializeField] private SpeechController speechController;
-
     private string currentAvatarSex = "F";
-    private string lastSpokenMessage = string.Empty;
-    private float lastSpeechTime = float.NegativeInfinity;
-    private const float DuplicateSpeechWindowSeconds = 3f;
 
     private void Awake()
     {
-        EnsureSpeechController();
         DisableAllAvatars();
 
         if (messageText != null)
         {
             messageText.text = "Cargando perfil del paciente...";
-        }
-    }
-
-    private void EnsureSpeechController()
-    {
-        if (speechController != null)
-            return;
-
-        speechController = GetComponent<SpeechController>();
-
-        if (speechController == null)
-        {
-            speechController = FindObjectOfType<SpeechController>();
-        }
-
-        if (speechController == null)
-        {
-            speechController = gameObject.AddComponent<SpeechController>();
         }
     }
 
@@ -91,7 +69,15 @@ public class AvatarBridge : MonoBehaviour
         ApplyEmotion(emotion);
         PlayAnimation(animation);
 
-        SpeakIfNeeded(message);
+        if (speechController != null && !string.IsNullOrWhiteSpace(message))
+        {
+            Debug.Log($"Calling TTS with avatar sex: {currentAvatarSex}");
+            speechController.Speak(message, currentAvatarSex, true);
+        }
+        else
+        {
+            Debug.LogWarning("SpeechController is not assigned or message is empty.");
+        }
     }
 
     public void ReceiveMessage(string json)
@@ -114,23 +100,9 @@ public class AvatarBridge : MonoBehaviour
         ApplyEmotion(data.emotion);
         PlayAnimation(data.animation);
 
-        SpeakIfNeeded(data.message);
-    }
-
-    private void SpeakIfNeeded(string message)
-    {
-        if (speechController == null || string.IsNullOrWhiteSpace(message))
-            return;
-
-        bool isDuplicate = message == lastSpokenMessage &&
-            Time.realtimeSinceStartup - lastSpeechTime < DuplicateSpeechWindowSeconds;
-
-        if (isDuplicate)
-            return;
-
-        lastSpokenMessage = message;
-        lastSpeechTime = Time.realtimeSinceStartup;
-        speechController.Speak(message, currentAvatarSex);
+        // IMPORTANT:
+        // Do not call TTS here to avoid duplicate audio.
+        // TTS should be triggered only from ShowMessageOnCurrentAvatar().
     }
 
     private string ResolveAvatarProfile(PatientContextMessage context)
@@ -164,23 +136,23 @@ public class AvatarBridge : MonoBehaviour
         {
             case "young_adult_support":
                 activeAvatar = youngAdultAvatar != null ? youngAdultAvatar : neutralSupportAvatar;
-                currentAvatarSex = "M"; 
+                currentAvatarSex = "F";
                 break;
 
             case "older_adult_support":
                 activeAvatar = olderAdultAvatar != null ? olderAdultAvatar : neutralSupportAvatar;
-                currentAvatarSex = "M"; // Tu OlderAdultAvatar es el médico masculino.
+                currentAvatarSex = "M";
                 break;
 
             case "adult_support":
                 activeAvatar = adultAvatar != null ? adultAvatar : neutralSupportAvatar;
-                currentAvatarSex = "F"; // AdultAvatar es mujer.
+                currentAvatarSex = "F";
                 break;
 
             case "neutral_support":
             default:
                 activeAvatar = neutralSupportAvatar;
-                currentAvatarSex = "F"; // NeutralSupportAvatar es mujer.
+                currentAvatarSex = "F";
                 break;
         }
 
@@ -200,7 +172,18 @@ public class AvatarBridge : MonoBehaviour
         if (animator == null)
         {
             Debug.LogWarning($"The active avatar '{activeAvatar.name}' does not have an Animator component.");
+            return;
         }
+
+        animator.Rebind();
+        animator.Update(0f);
+
+        animator.ResetTrigger("idle");
+        animator.ResetTrigger("talk");
+        animator.ResetTrigger("celebrate");
+        animator.ResetTrigger("empathetic");
+
+        animator.SetTrigger("idle");
     }
 
     private void DisableAllAvatars()
