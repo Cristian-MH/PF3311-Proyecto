@@ -59,4 +59,46 @@ public class MotivationController : ControllerBase
             });
         }
     }
+
+    [HttpPost("closing-message")]
+    public async Task<IActionResult> GenerateClosingMessage(
+    [FromBody] ClosingMessageRequest request,
+    CancellationToken cancellationToken)
+    {
+        if (request == null)
+        {
+            return BadRequest(new { message = "Request body is required." });
+        }
+
+        if (string.IsNullOrWhiteSpace(request.PatientResponse))
+        {
+            return BadRequest(new { message = "Patient response is required." });
+        }
+
+        try
+        {
+            string message = await _motivationService.GenerateClosingMessageAsync(
+                request,
+                cancellationToken);
+
+            return Ok(new ClosingMessageResponse
+            {
+                Message = message
+            });
+        }
+        catch (OpenAiConfigurationException)
+        {
+            return StatusCode(
+                StatusCodes.Status503ServiceUnavailable,
+                new { message = "OpenAI is not configured." });
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or OpenAiMotivationGenerationException)
+        {
+            return StatusCode(
+                StatusCodes.Status502BadGateway,
+                new { message = "Closing message generation failed." });
+        }
+    }
 }
+    

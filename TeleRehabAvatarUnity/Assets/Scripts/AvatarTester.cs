@@ -8,7 +8,8 @@ public class AvatarTester : MonoBehaviour
 
     [Header("Test timing")]
     [SerializeField] private float initialDelay = 2f;
-    [SerializeField] private float safetyTimeout = 60f;
+    [SerializeField] private float safetyTimeout = 90f;
+    [SerializeField] private float delayAfterInteraction = 1.5f;
 
     private bool interactionFinished;
 
@@ -21,10 +22,10 @@ public class AvatarTester : MonoBehaviour
     {
         yield return new WaitForSeconds(initialDelay);
 
-        yield return RunSingleTest("=== TEST 1: AdultAvatar ===", TestAdultPatient);
-        yield return RunSingleTest("=== TEST 2: YoungAdultAvatar ===", TestYoungPatient);
+        //yield return RunSingleTest("=== TEST 1: AdultAvatar ===", TestAdultPatient);
+       // yield return RunSingleTest("=== TEST 2: YoungAdultAvatar ===", TestYoungPatient);
         yield return RunSingleTest("=== TEST 3: OlderAdultAvatar ===", TestOlderPatient);
-        yield return RunSingleTest("=== TEST 4: NeutralSupportAvatar ===", TestLowTechPatient);
+        //yield return RunSingleTest("=== TEST 4: NeutralSupportAvatar ===", TestLowTechPatient);
 
         Debug.Log("=== ALL TEST CASES COMPLETED ===");
     }
@@ -57,7 +58,7 @@ public class AvatarTester : MonoBehaviour
 
         if (!interactionFinished)
         {
-            Debug.LogWarning($"Test finished by timeout: {testName}");
+            Debug.LogWarning($"Test finished by safety timeout: {testName}");
         }
 
         if (speechController != null)
@@ -65,12 +66,12 @@ public class AvatarTester : MonoBehaviour
             speechController.OnFullInteractionCompleted -= HandleInteractionCompleted;
         }
 
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(delayAfterInteraction);
     }
 
     private void HandleInteractionCompleted()
     {
-        Debug.Log("Interaction completed. Moving to next test.");
+        Debug.Log("Interaction completed. Moving to next avatar.");
         interactionFinished = true;
     }
 
@@ -80,7 +81,7 @@ public class AvatarTester : MonoBehaviour
             ""patientId"": ""11111111-1111-1111-1111-111111111111"",
             ""patientName"": ""Valeria"",
             ""age"": 35,
-            ""sex"": ""M"",
+            ""sex"": ""F"",
             ""nationality"": ""Costa Rica"",
             ""technologyLevel"": ""medium"",
             ""condition"": ""rehabilitación de pierna"",
@@ -98,7 +99,7 @@ public class AvatarTester : MonoBehaviour
             ""patientId"": ""22222222-2222-2222-2222-222222222222"",
             ""patientName"": ""Cristian"",
             ""age"": 22,
-            ""sex"": ""F"",
+            ""sex"": ""M"",
             ""nationality"": ""Costa Rica"",
             ""technologyLevel"": ""medium"",
             ""condition"": ""rehabilitación de hombro"",

@@ -122,6 +122,55 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &3730138
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3730140}
+  - component: {fileID: 3730139}
+  m_Layer: 0
+  m_Name: SpeechToTextController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &3730139
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3730138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa07f6c6364e64f2da90f1f8472f7a2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseUrl: https://pf3311-azf3h8a2a3gqcbeh.eastus2-01.azurewebsites.net/api
+  recordingSeconds: 5
+  sampleRate: 16000
+  delayBeforeRecording: 0.8
+  messageText: {fileID: 642475915}
+--- !u!4 &3730140
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3730138}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4.4258204, y: 6.1068716, z: -8.70063}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &206841074
 GameObject:
   m_ObjectHideFlags: 0
@@ -493,7 +542,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   baseUrl: https://pf3311-azf3h8a2a3gqcbeh.eastus2-01.azurewebsites.net/api
   audioSource: {fileID: 482194843}
-  speechToTextController: {fileID: 0}
+  speechToTextController: {fileID: 3730139}
   followUpQuestion: "Antes de terminar, \xBFc\xF3mo te sentiste realizando la terapia
     de hoy?"
   extraWaitAfterAudio: 0.8
@@ -617,6 +666,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &574337350 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -1351060966710510291, guid: fb4683edd72a14009bdfb8b8905e860a, type: 3}
+  m_PrefabInstance: {fileID: 1619369068}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &577245262
 GameObject:
   m_ObjectHideFlags: 0
@@ -1197,6 +1251,76 @@ Transform:
   - {fileID: 390392228}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &756890467
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 756890469}
+  - component: {fileID: 756890468}
+  - component: {fileID: 756890470}
+  m_Layer: 0
+  m_Name: LipSyncController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &756890468
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 756890467}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c67b61a0bd4c74dd89ef691beade9782, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  audioSource: {fileID: 482194843}
+  mouthTransform: {fileID: 574337350}
+  minScaleY: 1
+  maxScaleY: 1.35
+  sensitivity: 80
+  smoothSpeed: 12
+  moveMouthDown: 1
+  maxMoveDown: 0.015
+--- !u!4 &756890469
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 756890467}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4.4258204, y: 6.1068716, z: -8.70063}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &756890470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 756890467}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27a473258db6d4f6d9f9f1425696213f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  audioSource: {fileID: 482194843}
+  headBone: {fileID: 1341476824}
+  rotationAmount: 2.5
+  sensitivity: 90
+  smoothSpeed: 12
 --- !u!1 &771764525
 GameObject:
   m_ObjectHideFlags: 0
@@ -1705,6 +1829,11 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 15835c9a5e5c84c0e87f19cc49fcb94a, type: 3}
   m_PrefabInstance: {fileID: 390392227}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &1341476824 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -3321919801592875672, guid: f4303825367e54be7ac801aa4e992f54, type: 3}
+  m_PrefabInstance: {fileID: 1778118003}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1448353842
 GameObject:
   m_ObjectHideFlags: 0
@@ -2199,6 +2328,56 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1589024214}
   m_CullTransparentMesh: 1
+--- !u!1 &1609329226
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1609329228}
+  - component: {fileID: 1609329227}
+  m_Layer: 0
+  m_Name: MixamoFakeLipSyncController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1609329227
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1609329226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dcacb4dd2de04e3b81757927ddc7e3b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speechController: {fileID: 482194844}
+  headBone: {fileID: 1341476824}
+  headRotationAmount: 2.5
+  sideRotationAmount: 1.2
+  movementSpeed: 12
+  smoothSpeed: 14
+--- !u!4 &1609329228
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1609329226}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4.4258204, y: 6.1068716, z: -8.70063}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1619369068
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2396,8 +2575,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   motivationApiClient: {fileID: 1248441316}
+  speechController: {fileID: 482194844}
   initialDelay: 2
-  delayBetweenTests: 10
+  safetyTimeout: 60
+  delayAfterInteraction: 1.5
 --- !u!4 &2143908323
 Transform:
   m_ObjectHideFlags: 0
@@ -2436,3 +2617,6 @@ SceneRoots:
   - {fileID: 1546259434}
   - {fileID: 779445367}
   - {fileID: 482194845}
+  - {fileID: 3730140}
+  - {fileID: 756890469}
+  - {fileID: 1609329228}

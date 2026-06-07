@@ -174,6 +174,69 @@ public class MotivationService
 
         throw new OpenAiMotivationGenerationException("OpenAI did not return a message.");
     }
+
+    public async Task<string> GenerateClosingMessageAsync(
+    ClosingMessageRequest request,
+    CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(_apiKey))
+            throw new OpenAiConfigurationException("OpenAI:ApiKey is not configured.");
+
+        var requestBody = new
+        {
+            model = _model,
+            store = false,
+            instructions = """
+            Eres RehaBot, un asistente virtual de telerehabilitación.
+            Genera un mensaje de cierre en español para un paciente después de realizar su terapia
+            y responder cómo se sintió.
+
+            Reglas obligatorias:
+            - El mensaje debe tener al menos 100 palabras.
+            - Debe ser empático, humano, claro y motivador.
+            - Debe mencionar el nombre del paciente.
+            - Debe tomar en cuenta la respuesta del paciente.
+            - Debe reforzar positivamente el esfuerzo realizado.
+            - Si el paciente menciona dolor, molestia, cansancio, dificultad o frustración,
+              responde con empatía y recomienda avanzar con cuidado.
+            - No des diagnósticos médicos.
+            - No recomiendes medicamentos.
+            - No prometas recuperación.
+            - No indiques continuar si hay dolor intenso.
+            - Puedes recomendar consultar al profesional de salud si menciona dolor o malestar.
+            - Cierra con una frase motivadora.
+            - Devuelve únicamente el mensaje final, sin títulos ni explicaciones.
+            """,
+            input = JsonSerializer.Serialize(new
+            {
+                patient = new
+                {
+                    name = request.PatientName,
+                    condition = request.Condition
+                },
+                therapy = new
+                {
+                    name = request.TherapyName
+                },
+                patientResponse = request.PatientResponse
+            }, _jsonOptions)
+        };
+
+        using var openAiRequest = new HttpRequestMessage(HttpMethod.Post, _responsesUrl);
+        openAiRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+        openAiRequest.Content = new StringContent(
+            JsonSerializer.Serialize(requestBody, _jsonOptions),
+            Encoding.UTF8,
+            "application/json");
+
+        using var response = await _httpClient.SendAsync(openAiRequest, cancellationToken);
+        var responseJson = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+            throw new HttpRequestException($"OpenAI returned HTTP {(int)response.StatusCode}.");
+
+        return ExtractOutputText(responseJson);
+    }
 }
 
 public class MotivationContextNotFoundException : Exception

@@ -14,7 +14,7 @@ public class SpeechController : MonoBehaviour
     private AudioSource audioSource;
 
     [Header("Speech To Text")]
-    [SerializeField]    
+    [SerializeField]
     private SpeechToTextController speechToTextController;
 
     [Header("Interaction")]
@@ -26,8 +26,13 @@ public class SpeechController : MonoBehaviour
 
     public event System.Action OnFullInteractionCompleted;
 
+    // These events are used by MixamoFakeLipSync.
+    public event System.Action OnSpeechStarted;
+    public event System.Action OnSpeechEnded;
+
     private Coroutine currentSpeechFlow;
     private int speechSessionId = 0;
+    private string currentSessionSex = "F";
 
     private void Awake()
     {
@@ -66,6 +71,7 @@ public class SpeechController : MonoBehaviour
             sex = "F";
         }
 
+        currentSessionSex = sex;
         speechSessionId++;
 
         if (currentSpeechFlow != null)
@@ -178,11 +184,7 @@ public class SpeechController : MonoBehaviour
 
         using UnityWebRequest webRequest = new UnityWebRequest(url, "POST");
         webRequest.uploadHandler = new UploadHandlerRaw(bodyRaw);
-
-        // Your backend currently returns MP3.
-        // If later you change the backend to WAV, change AudioType.MPEG to AudioType.WAV.
         webRequest.downloadHandler = new DownloadHandlerAudioClip(url, AudioType.MPEG);
-
         webRequest.SetRequestHeader("Content-Type", "application/json");
         webRequest.SetRequestHeader("Accept", "*/*");
 
@@ -228,6 +230,9 @@ public class SpeechController : MonoBehaviour
 
         audioSource.Stop();
         audioSource.clip = clip;
+
+        OnSpeechStarted?.Invoke();
+
         audioSource.Play();
 
         Debug.Log($"TTS audio playing: {message}");
@@ -245,6 +250,8 @@ public class SpeechController : MonoBehaviour
 
         Debug.Log($"TTS audio finished. Elapsed: {elapsed}");
 
+        OnSpeechEnded?.Invoke();
+
         onCompleted?.Invoke(true);
     }
 
@@ -257,7 +264,70 @@ public class SpeechController : MonoBehaviour
             speechToTextController.OnResponseCaptured -= HandlePatientResponseCaptured;
         }
 
+        StartCoroutine(PlayClosingMessage(response));
+    }
+
+    private IEnumerator PlayClosingMessage(string patientResponse)
+    {
+        string closingMessage = BuildClosingMessage(patientResponse);
+
+        Debug.Log($"Closing message: {closingMessage}");
+
+        int sessionId = speechSessionId;
+        bool closingPlayed = false;
+
+        yield return StartCoroutine(RequestAndPlayAudio(
+            closingMessage,
+            currentSessionSex,
+            sessionId,
+            success => closingPlayed = success
+        ));
+
+        if (!closingPlayed)
+        {
+            Debug.LogWarning("Closing message was not played.");
+        }
+
+        yield return new WaitForSeconds(0.5f);
+
+        Debug.Log("Full interaction completed.");
         OnFullInteractionCompleted?.Invoke();
+    }
+
+    private string BuildClosingMessage(string patientResponse)
+    {
+        if (string.IsNullOrWhiteSpace(patientResponse) ||
+            patientResponse.ToLowerInvariant().Contains("no se detectó texto"))
+        {
+            return "Gracias por intentarlo. No logré escuchar bien tu respuesta, pero recuerda avanzar poco a poco con tu recuperación.";
+        }
+
+        string response = patientResponse.ToLowerInvariant();
+
+        if (response.Contains("dolor") ||
+            response.Contains("duele") ||
+            response.Contains("molestia"))
+        {
+            return "Gracias por contármelo. Si sentiste dolor o molestia, realiza los ejercicios con cuidado y coméntalo con tu profesional de salud.";
+        }
+
+        if (response.Contains("cansado") ||
+            response.Contains("cansada") ||
+            response.Contains("agotado") ||
+            response.Contains("agotada"))
+        {
+            return "Gracias por compartirlo. Es normal sentirse cansado después de la terapia. Descansa un poco y sigue avanzando a tu ritmo.";
+        }
+
+        if (response.Contains("bien") ||
+            response.Contains("mejor") ||
+            response.Contains("excelente") ||
+            response.Contains("feliz"))
+        {
+            return "Me alegra saber que te sentiste bien. Sigue con esa constancia, cada sesión te acerca más a tu recuperación.";
+        }
+
+        return "Gracias por compartir cómo te sentiste. Tu respuesta queda registrada y nos ayuda a acompañarte mejor en tu proceso.";
     }
 }
 

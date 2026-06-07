@@ -401,7 +401,8 @@ PlayerSettings:
   enableCrashReportAPI: 0
   cameraUsageDescription: 
   locationUsageDescription: 
-  microphoneUsageDescription: 
+  microphoneUsageDescription: "La aplicaci\xF3n usa el micr\xF3fono para registrar
+    la respuesta del paciente durante la interacci\xF3n con el avatar."
   bluetoothUsageDescription: 
   macOSTargetOSVersion: 10.13.0
   switchNMETAOverride: 
