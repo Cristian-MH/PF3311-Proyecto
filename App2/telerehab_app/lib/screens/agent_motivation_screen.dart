@@ -14,7 +14,6 @@ class AgentMotivationScreen extends StatefulWidget {
   final Therapy therapy;
   final bool completed;
   final int moodLevel;
-  final String message;
 
   const AgentMotivationScreen({
     super.key,
@@ -22,7 +21,6 @@ class AgentMotivationScreen extends StatefulWidget {
     required this.therapy,
     required this.completed,
     required this.moodLevel,
-    required this.message,
   });
 
   @override
@@ -75,9 +73,11 @@ class _AgentMotivationScreenState extends State<AgentMotivationScreen>
   void _sendMessagesToUnity() {
     final patientContext = jsonEncode({
       'patientId': widget.patient.id,
+      'therapyId': widget.therapy.id,
       'patientName': widget.patient.fullName,
       'age': widget.patient.age,
       'sex': widget.patient.sex,
+      'nationality': 'Costa Rica',
       'technologyLevel': widget.patient.technologyLevel,
       'condition': widget.patient.condition,
       'therapyName': widget.therapy.name,
@@ -85,42 +85,17 @@ class _AgentMotivationScreenState extends State<AgentMotivationScreen>
       'completedLastTherapy': widget.completed,
     });
 
-    final avatarMessage = jsonEncode({
-      'message': widget.message,
-      'avatarProfile': _avatarProfile,
-      'emotion': _emotion,
-      'animation': _animation,
-    });
-
-    sendToUnity('AvatarBridge', 'ApplyPatientContext', patientContext);
-    sendToUnity('AvatarBridge', 'ReceiveMessage', avatarMessage);
+    sendToUnity(
+      'MotivationApiClient',
+      'RequestMotivationMessage',
+      patientContext,
+    );
   }
 
   String get _moodDescription {
     if (widget.moodLevel <= 2) return 'cansado';
     if (widget.moodLevel >= 4) return 'motivado';
     return 'neutral';
-  }
-
-  String get _avatarProfile {
-    if (widget.patient.age < 30) return 'young_adult_support';
-    if (widget.patient.age >= 60) return 'older_adult_support';
-    if (widget.patient.technologyLevel.toLowerCase() == 'low') {
-      return 'neutral_support';
-    }
-    return 'adult_support';
-  }
-
-  String get _emotion {
-    if (widget.completed) return 'happy';
-    if (widget.moodLevel <= 2) return 'empathetic';
-    return 'neutral';
-  }
-
-  String get _animation {
-    if (widget.completed) return 'celebrate';
-    if (widget.moodLevel <= 2) return 'empathetic';
-    return 'talk';
   }
 
   Widget _buildAvatar(BuildContext context) {
@@ -216,7 +191,7 @@ class _AgentMotivationScreenState extends State<AgentMotivationScreen>
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      widget.message,
+                      'Tu agente está generando un mensaje personalizado según tu contexto de rehabilitación.',
                       style: Theme.of(context).textTheme.bodyLarge,
                       textAlign: TextAlign.center,
                     ),

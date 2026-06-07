@@ -46,7 +46,7 @@ class UnityViewStack {
             // This is a workaround to show the status bar:
             // TODO: FLAG_FULLSCREEN is deprecated, what to replace it with?
             // unityEngineSingleton.windowInsetsController?.show(WindowInsets.Type.statusBars()) doesn't seem to work...
-            ViewUtils.getActivity(unityPlayerSingleton.context)?.window?.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+            unityPlayerSingleton.context.window?.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
 
             Log.i(logTag, "Attached Unity to new view")
         }

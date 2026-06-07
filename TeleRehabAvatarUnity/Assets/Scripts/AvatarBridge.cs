@@ -24,6 +24,8 @@ public class AvatarBridge : MonoBehaviour
 
     private string currentAvatarSex = "F";
 
+    private string currentPatientId;
+
     private void Awake()
     {
         DisableAllAvatars();
@@ -40,6 +42,9 @@ public class AvatarBridge : MonoBehaviour
         Debug.Log(json);
 
         PatientContextMessage context = JsonUtility.FromJson<PatientContextMessage>(json);
+
+
+        currentPatientId = context.patientId;
 
         string avatarProfile = ResolveAvatarProfile(context);
 

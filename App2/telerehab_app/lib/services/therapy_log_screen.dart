@@ -5,7 +5,6 @@ import '../models/therapy.dart';
 import '../models/therapy_log.dart';
 import '../screens/agent_motivation_screen.dart';
 import '../screens/api_service.dart';
-import '../theme/app2_theme.dart';
 
 class TherapyLogScreen extends StatefulWidget {
   final Patient patient;
@@ -49,20 +48,7 @@ class _TherapyLogScreenState extends State<TherapyLogScreen> {
 
       if (!mounted) return;
 
-      late final String motivationMessage;
-      try {
-        motivationMessage = await _apiService.getMotivationMessage(
-          patientId: widget.patient.id,
-          therapyId: widget.therapy.id,
-        );
-      } catch (_) {
-        motivationMessage =
-            'Tu avance cuenta. Continúa a tu ritmo y detente si el dolor aumenta.';
-      }
-
-      if (!mounted) return;
-
-      Navigator.pushReplacement(
+      Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => AgentMotivationScreen(
@@ -70,7 +56,6 @@ class _TherapyLogScreenState extends State<TherapyLogScreen> {
             therapy: widget.therapy,
             completed: _completed,
             moodLevel: _moodLevel,
-            message: motivationMessage,
           ),
         ),
       );
@@ -120,38 +105,20 @@ class _TherapyLogScreenState extends State<TherapyLogScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Registrar mi sesión'),
+        title: const Text('Registrar terapia'),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Card(
-            color: App2Palette.softAqua,
             child: Padding(
-              padding: const EdgeInsets.all(18),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
-                    children: [
-                      Icon(Icons.smart_toy, color: App2Palette.teal),
-                      SizedBox(width: 8),
-                      Text(
-                        'Ejercicio guiado',
-                        style: TextStyle(
-                          color: App2Palette.teal,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
                   Text(
                     therapy.name,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: App2Palette.deepNavy,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),
                   Text(therapy.instructions),
@@ -164,10 +131,6 @@ class _TherapyLogScreenState extends State<TherapyLogScreen> {
           ),
           const SizedBox(height: 16),
           SwitchListTile(
-            tileColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
-            ),
             title: const Text('¿Completó la terapia?'),
             value: _completed,
             onChanged: (value) {
@@ -211,8 +174,8 @@ class _TherapyLogScreenState extends State<TherapyLogScreen> {
                 : const Icon(Icons.save),
             label: Text(
               _isSaving
-                  ? 'Tu agente está preparando un mensaje...'
-                  : 'Guardar y hablar con mi agente',
+                  ? 'Guardando registro...'
+                  : 'Guardar registro',
             ),
           ),
         ],

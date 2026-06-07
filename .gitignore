@@ -1,0 +1,37 @@
+# OS/editor files
+.DS_Store
+
+# Flutter/Dart generated files
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+**/build/
+
+# Android/Gradle generated files
+**/.gradle/
+**/local.properties
+
+# Unity generated/cache folders
+TeleRehabAvatarUnity/Library/
+TeleRehabAvatarUnity/Logs/
+TeleRehabAvatarUnity/Temp/
+TeleRehabAvatarUnity/Obj/
+TeleRehabAvatarUnity/Build/
+TeleRehabAvatarUnity/build/
+TeleRehabAvatarUnity/.utmp/
+TeleRehabAvatarUnity/*.apk
+TeleRehabAvatarUnity/*.aab
+
+# Unity Android exports embedded into Flutter are generated artifacts.
+# They contain large IL2CPP native libraries that should not be committed.
+App2/telerehab_app/android/unityLibrary/
+App2/telerehab_app/unityLibrary/
+App2/telerehab_app/launcher/
+App2/telerehab_app/shared/
+App2/telerehab_app/android/shared/
+App2/telerehab_app/android/build/
+
+# Native Unity/IL2CPP binaries
+*.so
+*.dbg.so

@@ -19,9 +19,12 @@ public static class TeleRehabUnityExportSetup
             NamedBuildTarget.Android,
             ScriptingImplementation.IL2CPP
         );
-        PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel22;
-        PlayerSettings.Android.targetArchitectures =
-            AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
+        // Unity 6 requires minimum Android API level 25 or higher
+        PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel25;
+
+        // Let Unity use the installed/recommended target SDK automatically
+        PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevelAuto;
+        PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
         EditorUserBuildSettings.exportAsGoogleAndroidProject = true;
 
         AssetDatabase.SaveAssets();

@@ -11,7 +11,7 @@ public class MotivationApiClient : MonoBehaviour
 
     [Header("Endpoints")]
     [SerializeField]
-    private string motivationByIdEndpoint = "/Motivation";
+    private string motivationByIdEndpoint = "/Motivation/message";
 
     [SerializeField]
     private string contextMessageEndpoint = "/Motivation/context-message";
@@ -22,8 +22,31 @@ public class MotivationApiClient : MonoBehaviour
 
     private int currentRequestId = 0;
 
+    private void Awake()
+    {
+        NormalizeEndpoints();
+    }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        NormalizeEndpoints();
+    }
+#endif
+
+    private void NormalizeEndpoints()
+    {
+        if (string.IsNullOrWhiteSpace(motivationByIdEndpoint) ||
+            motivationByIdEndpoint == "/Motivation")
+        {
+            motivationByIdEndpoint = "/Motivation/message";
+        }
+    }
+
     public void RequestMotivationMessage(string json)
     {
+        NormalizeEndpoints();
+
         currentRequestId++;
 
         int requestId = currentRequestId;
@@ -174,6 +197,8 @@ public class MotivationApiClient : MonoBehaviour
 
         ContextMotivationRequest request = new ContextMotivationRequest
         {
+            patientId = context.patientId,
+            therapyId = context.therapyId,
             patientName = context.patientName,
             age = context.age,
             sex = context.sex,
@@ -338,6 +363,8 @@ public class MotivationByIdRequest
 [System.Serializable]
 public class ContextMotivationRequest
 {
+    public string patientId;
+    public string therapyId;
     public string patientName;
     public int age;
     public string sex;

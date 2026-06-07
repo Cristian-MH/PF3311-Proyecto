@@ -33,7 +33,7 @@ class UnityView(viewFactoryContext: Context) : PlatformView, IUnityViewStackable
     override var onDispose: (() -> Unit)? = null
 
     override fun attachUnity(unityPlayerSingleton: UnityPlayerSingleton) {
-        baseView.addView(unityPlayerSingleton)
+        baseView.addView(unityPlayerSingleton.view)
         Log.i(logTag, "Attached Unity to view")
     }
 

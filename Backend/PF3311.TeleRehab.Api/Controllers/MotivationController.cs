@@ -19,6 +19,7 @@ public class MotivationController : ControllerBase
         _logger = logger;
     }
 
+    [HttpPost]
     [HttpPost("message")]
     public async Task<IActionResult> GenerateMessage(
         [FromBody] MotivationRequest request,
@@ -111,14 +112,21 @@ public class MotivationController : ControllerBase
             return BadRequest(new { message = "Request body is required." });
         }
 
-        if (string.IsNullOrWhiteSpace(request.PatientName))
+        bool hasContextIds = request.PatientId != Guid.Empty || request.TherapyId != Guid.Empty;
+
+        if (!hasContextIds && string.IsNullOrWhiteSpace(request.PatientName))
         {
             return BadRequest(new { message = "Patient name is required." });
         }
 
-        if (string.IsNullOrWhiteSpace(request.TherapyName))
+        if (!hasContextIds && string.IsNullOrWhiteSpace(request.TherapyName))
         {
             return BadRequest(new { message = "Therapy name is required." });
+        }
+
+        if (hasContextIds && (request.PatientId == Guid.Empty || request.TherapyId == Guid.Empty))
+        {
+            return BadRequest(new { message = "PatientId and TherapyId are required together." });
         }
 
         try
@@ -131,6 +139,10 @@ public class MotivationController : ControllerBase
             {
                 Message = message
             });
+        }
+        catch (MotivationContextNotFoundException exception)
+        {
+            return NotFound(new { message = exception.Message });
         }
         catch (OpenAiConfigurationException)
         {

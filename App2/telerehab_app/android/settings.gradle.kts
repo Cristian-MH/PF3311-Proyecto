@@ -25,6 +25,9 @@ plugins {
 
 include(":app")
 
-if (file("unityLibrary").exists()) {
+if (file("unityLibrary/unityLibrary").exists()) {
+    include(":unityLibrary")
+    project(":unityLibrary").projectDir = file("unityLibrary/unityLibrary")
+} else if (file("unityLibrary").exists()) {
     include(":unityLibrary")
 }

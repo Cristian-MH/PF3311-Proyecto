@@ -6,12 +6,14 @@ using TMPro;
 
 public class SpeechToTextController : MonoBehaviour
 {
+    private const int MinimumRecordingSeconds = 12;
+
     [Header("Backend")]
     [SerializeField]
     private string baseUrl = "https://pf3311-azf3h8a2a3gqcbeh.eastus2-01.azurewebsites.net/api";
 
     [Header("Recording")]
-    [SerializeField] private int recordingSeconds = 10;
+    [SerializeField] private int recordingSeconds = MinimumRecordingSeconds;
     [SerializeField] private int sampleRate = 16000;
     [SerializeField] private float delayBeforeRecording = 0.8f;
 
@@ -19,6 +21,18 @@ public class SpeechToTextController : MonoBehaviour
     [SerializeField] private TMP_Text messageText;
 
     public event Action<string> OnResponseCaptured;
+
+    private void Awake()
+    {
+        recordingSeconds = Mathf.Max(recordingSeconds, MinimumRecordingSeconds);
+    }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        recordingSeconds = Mathf.Max(recordingSeconds, MinimumRecordingSeconds);
+    }
+#endif
 
     public void StartListening()
     {
@@ -51,15 +65,17 @@ public class SpeechToTextController : MonoBehaviour
 
         Debug.Log($"Selected microphone: {microphoneName}");
 
+        int captureSeconds = Mathf.Max(recordingSeconds, MinimumRecordingSeconds);
+
         if (messageText != null)
-            messageText.text = "Te escucho... responde ahora.";
+            messageText.text = $"Te escucho... responde durante al menos {captureSeconds} segundos.";
 
         yield return new WaitForSeconds(delayBeforeRecording);
 
         AudioClip clip = Microphone.Start(
             microphoneName,
             false,
-            recordingSeconds,
+            captureSeconds,
             sampleRate
         );
 
@@ -97,7 +113,7 @@ public class SpeechToTextController : MonoBehaviour
 
         Debug.Log("Microphone recording started. SPEAK NOW.");
 
-        yield return new WaitForSeconds(recordingSeconds);
+        yield return new WaitForSeconds(captureSeconds);
 
         int recordedPosition = Microphone.GetPosition(microphoneName);
 

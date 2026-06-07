@@ -1,0 +1,5 @@
+﻿<Solution>
+  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="FlutterEmbed.Runtime.csproj" />
+  <Project Path="FlutterEmbed.Editor.csproj" />
+</Solution>

@@ -2,16 +2,21 @@ package com.learntoflutter.flutter_embed_unity_android.unity
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.View
 import com.learntoflutter.flutter_embed_unity_android.constants.FlutterEmbedConstants.Companion.logTag
-import com.unity3d.player.UnityPlayer
+import com.unity3d.player.IUnityPlayerLifecycleEvents
 import io.flutter.Log
 
 
 @SuppressLint("ViewConstructor")
-class UnityPlayerSingleton private constructor (activity: Activity) : UnityPlayer(activity) {
+class UnityPlayerSingleton private constructor(activity: Activity) : IUnityPlayerLifecycleEvents {
+    val context: Activity = activity
+    private val player = createUnityPlayerConnection(activity)
+    val view: View = callUnityMethod("getFrameLayout") as View
+
     companion object {
         // We must use a singleton UnityPlayer, because it was never designed to be
         // reused in multiple views. Calling unityPlayer.destroy() will kill the
@@ -37,11 +42,6 @@ class UnityPlayerSingleton private constructor (activity: Activity) : UnityPlaye
                 else {
                     flutterActivity.let { flutterActivity ->
                         if(flutterActivity != null) {
-                            // UnityPlayerSingleton expects to be passed a context which is an Activity.
-                            // UnityPlayer will crash during resume() if it isn't (NullPointerException: Attempt
-                            // to invoke virtual method
-                            // 'android.content.ContentResolver android.content.Context.getContentResolver()'
-                            // on a null object reference)
                             val player = UnityPlayerSingleton(flutterActivity)
 
                             // This is to work around issue when using Unity AR features
@@ -78,7 +78,7 @@ class UnityPlayerSingleton private constructor (activity: Activity) : UnityPlaye
 
     // This is required for Unity to receive touch events
     @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(motionEvent: MotionEvent): Boolean {
+    fun onTouchEvent(motionEvent: MotionEvent): Boolean {
         motionEvent.source = InputDevice.SOURCE_TOUCHSCREEN
 //        Log.i(logTag, "onTouchEvent")
     
@@ -90,13 +90,13 @@ class UnityPlayerSingleton private constructor (activity: Activity) : UnityPlaye
             */
             val modifiedEvent = motionEvent.copy(deviceId = -1)
             motionEvent.recycle()
-            return super.onTouchEvent(modifiedEvent)
+            return callUnityMethod("injectEvent", modifiedEvent) as? Boolean ?: false
         } else {
-            return super.onTouchEvent(motionEvent)
+            return callUnityMethod("injectEvent", motionEvent) as? Boolean ?: false
         }
     }
 
-    override fun onWindowVisibilityChanged(visibility: Int) {
+    fun onWindowVisibilityChanged(visibility: Int) {
         Log.d(logTag, "UnityPlayerSingleton onWindowVisibilityChanged $visibility")
 
         if(visibility == View.VISIBLE) {
@@ -115,8 +115,56 @@ class UnityPlayerSingleton private constructor (activity: Activity) : UnityPlaye
             pause()
             resume()
         }
+    }
 
-        super.onWindowVisibilityChanged(visibility)
+    fun requestFocus(): Boolean = view.requestFocus()
+
+    fun windowFocusChanged(hasFocus: Boolean) {
+        callUnityMethod("windowFocusChanged", hasFocus)
+    }
+
+    fun pause() {
+        callUnityMethod("onPause")
+    }
+
+    fun resume() {
+        callUnityMethod("onResume")
+    }
+
+    fun destroy() {
+        callUnityMethod("destroy")
+    }
+
+    private fun createUnityPlayerConnection(activity: Activity): Any {
+        val playerClass = Class.forName("com.unity3d.player.UnityPlayerForActivityOrService")
+        val constructor = runCatching {
+            playerClass.getConstructor(
+                Context::class.java,
+                IUnityPlayerLifecycleEvents::class.java
+            )
+        }.getOrElse {
+            playerClass.getConstructor(Context::class.java)
+        }
+
+        return when (constructor.parameterTypes.size) {
+            2 -> constructor.newInstance(activity, this)
+            else -> constructor.newInstance(activity)
+        }
+    }
+
+    private fun callUnityMethod(methodName: String, vararg args: Any): Any? {
+        val method = player.javaClass.methods.first { method ->
+            method.name == methodName && method.parameterTypes.size == args.size
+        }
+        return method.invoke(player, *args)
+    }
+
+    override fun onUnityPlayerUnloaded() {
+        Log.d(logTag, "Unity player unloaded")
+    }
+
+    override fun onUnityPlayerQuitted() {
+        Log.d(logTag, "Unity player quitted")
     }
 
     // Overriding kill() was an experiment to try to resolve app closing / crashing when

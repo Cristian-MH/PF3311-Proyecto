@@ -100,6 +100,8 @@ public class MotivationService
         if (string.IsNullOrWhiteSpace(_apiKey))
             throw new OpenAiConfigurationException("OpenAI:ApiKey is not configured.");
 
+        var context = ResolveContextMotivationRequest(request);
+
         var requestBody = new
         {
             model = _model,
@@ -126,22 +128,30 @@ public class MotivationService
             {
                 patient = new
                 {
-                    name = request.PatientName,
-                    age = request.Age,
-                    sex = request.Sex,
-                    nationality = request.Nationality,
-                    technologyLevel = request.TechnologyLevel,
-                    condition = request.Condition
+                    name = context.Request.PatientName,
+                    age = context.Request.Age,
+                    sex = context.Request.Sex,
+                    nationality = context.Request.Nationality,
+                    technologyLevel = context.Request.TechnologyLevel,
+                    condition = context.Request.Condition
                 },
                 therapy = new
                 {
-                    name = request.TherapyName,
-                    completedLastTherapy = request.CompletedLastTherapy
+                    name = context.Request.TherapyName,
+                    completedLastTherapy = context.Request.CompletedLastTherapy
                 },
                 emotionalState = new
                 {
-                    mood = request.Mood
-                }
+                    mood = context.Request.Mood
+                },
+                recentProgress = context.RecentLogs.Select(log => new
+                {
+                    log.CompletedAt,
+                    log.Completed,
+                    log.MoodLevel,
+                    log.PainLevel,
+                    log.Comment
+                })
             }, _jsonOptions)
         };
 
@@ -159,6 +169,55 @@ public class MotivationService
         }
 
         return ExtractOutputText(responseJson);
+    }
+
+    private (ContextMotivationRequest Request, IReadOnlyList<TherapyLog> RecentLogs)
+        ResolveContextMotivationRequest(ContextMotivationRequest request)
+    {
+        if (request.PatientId == Guid.Empty && request.TherapyId == Guid.Empty)
+            return (request, Array.Empty<TherapyLog>());
+
+        MotivationRequest motivationRequest = new()
+        {
+            PatientId = request.PatientId,
+            TherapyId = request.TherapyId
+        };
+
+        var (patient, therapy, recentLogs) = GetContext(motivationRequest);
+        TherapyLog? latestLog = recentLogs.FirstOrDefault();
+
+        return (new ContextMotivationRequest
+        {
+            PatientId = patient.Id,
+            TherapyId = therapy.Id,
+            PatientName = patient.FullName,
+            Age = patient.Age,
+            Sex = patient.Sex,
+            Nationality = string.IsNullOrWhiteSpace(request.Nationality)
+                ? "Costa Rica"
+                : request.Nationality,
+            TechnologyLevel = patient.TechnologyLevel,
+            Condition = patient.Condition,
+            TherapyName = therapy.Name,
+            Mood = string.IsNullOrWhiteSpace(request.Mood)
+                ? ResolveMoodDescription(latestLog)
+                : request.Mood,
+            CompletedLastTherapy = latestLog?.Completed ?? request.CompletedLastTherapy
+        }, recentLogs);
+    }
+
+    private static string ResolveMoodDescription(TherapyLog? latestLog)
+    {
+        if (latestLog is null)
+            return "neutral";
+
+        if (latestLog.PainLevel >= 4 || latestLog.MoodLevel <= 2)
+            return "cansado";
+
+        if (latestLog.MoodLevel >= 4)
+            return "motivado";
+
+        return "neutral";
     }
 
     public async Task<string> GenerateClosingMessageAsync(
