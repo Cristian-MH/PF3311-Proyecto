@@ -75,7 +75,7 @@ public class SpeechToTextController : MonoBehaviour
         if (messageText != null)
             messageText.text = "Procesando tu respuesta...";
 
-        byte[] wavData = WavUtility.FromAudioClip(clip);
+        byte[] wavData = WavUtility.FromAudioClipTo16KhzMono(clip);
 
         yield return StartCoroutine(SendAudioToBackend(wavData));
     }
@@ -90,6 +90,7 @@ public class SpeechToTextController : MonoBehaviour
         using UnityWebRequest request = UnityWebRequest.Post(url, form);
 
         Debug.Log($"Sending audio to STT endpoint: {url}");
+        
 
         yield return request.SendWebRequest();
 
