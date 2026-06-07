@@ -80,45 +80,70 @@ public class SpeechService
         return builder.ToString();
     }
 
-    public async Task<string> TranscribeAsync(
-        byte[] audioBytes,
-        CancellationToken cancellationToken = default)
+    public async Task<SpeechTranscriptionResult> TranscribeAsync(byte[] audioBytes)
     {
-        ArgumentNullException.ThrowIfNull(audioBytes);
-
-        if (audioBytes.Length == 0)
+        if (audioBytes == null || audioBytes.Length == 0)
+        {
             throw new ArgumentException("Audio is required.", nameof(audioBytes));
+        }
 
-        if (string.IsNullOrWhiteSpace(_key) || string.IsNullOrWhiteSpace(_region))
-            throw new AzureSpeechConfigurationException("Azure Speech is not configured.");
+        string language = "es-CR";
 
-        var url =
-            $"https://{_region}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language=es-CR";
+        string url =
+            $"https://{_region}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language={language}&format=simple";
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, url);
+        using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
+
         request.Headers.Add("Ocp-Apim-Subscription-Key", _key);
         request.Headers.Add("Accept", "application/json");
+
         request.Content = new ByteArrayContent(audioBytes);
         request.Content.Headers.ContentType =
             new System.Net.Http.Headers.MediaTypeHeaderValue("audio/wav");
 
-        using var response = await _httpClient.SendAsync(request, cancellationToken);
+        using HttpResponseMessage response = await _httpClient.SendAsync(request);
+
+        string responseBody = await response.Content.ReadAsStringAsync();
+
+        Console.WriteLine("Azure STT raw response:");
+        Console.WriteLine(responseBody);
 
         if (!response.IsSuccessStatusCode)
         {
-            throw new AzureSpeechRecognitionException(
-                $"Azure Speech returned HTTP {(int)response.StatusCode}.");
+            return new SpeechTranscriptionResult
+            {
+                Text = string.Empty,
+                RecognitionStatus = "HttpError",
+                RawResponse = responseBody,
+                Error = $"Azure Speech STT error {(int)response.StatusCode}"
+            };
         }
 
-        var result = await response.Content.ReadFromJsonAsync<AzureSpeechRecognitionResponse>(
-            cancellationToken);
+        AzureSpeechRecognitionResponse? azureResult =
+            System.Text.Json.JsonSerializer.Deserialize<AzureSpeechRecognitionResponse>(
+                responseBody,
+                new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }
+            );
 
-        if (result is null)
-            return string.Empty;
+        if (azureResult == null)
+        {
+            return new SpeechTranscriptionResult
+            {
+                Text = string.Empty,
+                RecognitionStatus = "InvalidResponse",
+                RawResponse = responseBody
+            };
+        }
 
-        return string.Equals(result.RecognitionStatus, "Success", StringComparison.OrdinalIgnoreCase)
-            ? result.DisplayText
-            : string.Empty;
+        return new SpeechTranscriptionResult
+        {
+            Text = azureResult.DisplayText ?? string.Empty,
+            RecognitionStatus = azureResult.RecognitionStatus ?? string.Empty,
+            RawResponse = responseBody
+        };
     }
 }
 
@@ -144,6 +169,14 @@ public class AzureSpeechRecognitionException : Exception
         : base(message)
     {
     }
+}
+
+public class SpeechTranscriptionResult
+{
+    public string Text { get; set; } = string.Empty;
+    public string RecognitionStatus { get; set; } = string.Empty;
+    public string RawResponse { get; set; } = string.Empty;
+    public string Error { get; set; } = string.Empty;
 }
 
 public class AzureSpeechRecognitionResponse

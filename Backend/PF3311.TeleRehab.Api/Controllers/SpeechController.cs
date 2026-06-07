@@ -70,12 +70,9 @@ public class SpeechController : ControllerBase
 
         byte[] audioBytes = memoryStream.ToArray();
 
-        string text = await _speechService.TranscribeAsync(audioBytes);
+        var result = await _speechService.TranscribeAsync(audioBytes);
 
-        return Ok(new
-        {
-            text
-        });
+        return Ok(result);
     }
 
 }
