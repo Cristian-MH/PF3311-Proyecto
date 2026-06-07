@@ -247,6 +247,36 @@ public class AvatarBridge : MonoBehaviour
 
         animator.SetTrigger(animationName);
     }
+
+    private void Start()
+    {
+        if (speechController != null)
+        {
+            speechController.OnSpeechStarted += HandleSpeechStarted;
+            speechController.OnSpeechEnded += HandleSpeechEnded;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (speechController != null)
+        {
+            speechController.OnSpeechStarted -= HandleSpeechStarted;
+            speechController.OnSpeechEnded -= HandleSpeechEnded;
+        }
+    }
+
+    private void HandleSpeechStarted()
+    {
+        Debug.Log("Avatar speech started. Playing talk animation.");
+        PlayAnimation("talk");
+    }
+
+    private void HandleSpeechEnded()
+    {
+        Debug.Log("Avatar speech ended. Returning to idle.");
+        PlayAnimation("idle");
+    }
 }
 
 [System.Serializable]

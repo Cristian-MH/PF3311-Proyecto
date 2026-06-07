@@ -9,6 +9,13 @@ public class MotivationApiClient : MonoBehaviour
     [SerializeField]
     private string baseUrl = "https://pf3311-azf3h8a2a3gqcbeh.eastus2-01.azurewebsites.net/api";
 
+    [Header("Endpoints")]
+    [SerializeField]
+    private string motivationByIdEndpoint = "/Motivation";
+
+    [SerializeField]
+    private string contextMessageEndpoint = "/Motivation/context-message";
+
     [Header("Avatar Bridge")]
     [SerializeField]
     private AvatarBridge avatarBridge;
@@ -26,34 +33,147 @@ public class MotivationApiClient : MonoBehaviour
 
         PatientContextMessage context = JsonUtility.FromJson<PatientContextMessage>(json);
 
-        string avatarProfile = ResolveAvatarProfile(context);
-
-        Debug.Log($"Request {requestId} - Avatar profile resolved BEFORE backend: {avatarProfile}");
-
         if (avatarBridge != null)
         {
             // 1. Primero carga el avatar correcto.
             avatarBridge.ApplyPatientContext(json);
 
-            // 2. Luego muestra estado de espera sin cambiar avatar.
-            avatarBridge.ShowMessageOnCurrentAvatar(
+            // 2. Muestra loading, pero sin TTS.
+            avatarBridge.ShowLoadingOnCurrentAvatar(
                 "Generando mensaje motivacional personalizado...",
-                "neutral",
                 "talk"
             );
         }
 
-        // 3. Después llama al backend.
-        StartCoroutine(PostMotivationRequest(context, requestId));
+        // 3. Luego intenta backend por ID y si falla usa contexto.
+        StartCoroutine(GetMotivationMessageFlow(context, requestId));
     }
 
-    private IEnumerator PostMotivationRequest(PatientContextMessage context, int requestId)
+    private IEnumerator GetMotivationMessageFlow(
+        PatientContextMessage context,
+        int requestId)
     {
-        string url = $"{baseUrl}/Motivation/context-message";
+        string message = null;
 
-        MotivationRequest request = new MotivationRequest
+        // Primero intenta por ID solo si hay patientId y therapyId.
+        if (!string.IsNullOrWhiteSpace(context.patientId) &&
+            !string.IsNullOrWhiteSpace(context.therapyId))
+        {
+            yield return StartCoroutine(RequestMessageById(
+                context,
+                requestId,
+                result => message = result
+            ));
+        }
+        else
+        {
+            Debug.LogWarning("patientId or therapyId is empty. Skipping ID-based motivation endpoint.");
+        }
+
+        if (requestId != currentRequestId)
+        {
+            Debug.Log("Ignoring old motivation request.");
+            yield break;
+        }
+
+        // Si por ID falló, usa el endpoint de contexto.
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            Debug.LogWarning("ID-based motivation failed or returned empty. Trying context-message endpoint.");
+
+            yield return StartCoroutine(RequestMessageByContext(
+                context,
+                requestId,
+                result => message = result
+            ));
+        }
+
+        if (requestId != currentRequestId)
+        {
+            Debug.Log("Ignoring old context motivation request.");
+            yield break;
+        }
+
+        // Si aun así falla, usamos fallback local personalizado.
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            Debug.LogWarning("Context-message endpoint failed. Using local personalized fallback.");
+            message = BuildPersonalizedFallbackMessage(context);
+        }
+
+        AvatarMessage avatarMessage = BuildAvatarMessage(context, message);
+
+        if (avatarBridge != null)
+        {
+            avatarBridge.ShowMessageOnCurrentAvatar(
+                avatarMessage.message,
+                avatarMessage.emotion,
+                avatarMessage.animation
+            );
+        }
+    }
+
+    private IEnumerator RequestMessageById(
+        PatientContextMessage context,
+        int requestId,
+        System.Action<string> onCompleted)
+    {
+        string url = $"{baseUrl}{motivationByIdEndpoint}";
+
+        MotivationByIdRequest request = new MotivationByIdRequest
         {
             patientId = context.patientId,
+            therapyId = context.therapyId
+        };
+
+        string body = JsonUtility.ToJson(request);
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(body);
+
+        using UnityWebRequest webRequest = new UnityWebRequest(url, "POST");
+        webRequest.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        webRequest.downloadHandler = new DownloadHandlerBuffer();
+        webRequest.SetRequestHeader("Content-Type", "application/json");
+        webRequest.SetRequestHeader("Accept", "application/json");
+
+        Debug.Log($"Requesting motivation by ID from: {url}");
+        Debug.Log($"Motivation by ID request body: {body}");
+
+        yield return webRequest.SendWebRequest();
+
+        if (requestId != currentRequestId)
+        {
+            onCompleted?.Invoke(null);
+            yield break;
+        }
+
+        Debug.Log($"Motivation by ID response code: {webRequest.responseCode}");
+
+        if (webRequest.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogWarning($"Motivation by ID failed: {webRequest.error}");
+            Debug.LogWarning($"Motivation by ID response: {webRequest.downloadHandler.text}");
+            onCompleted?.Invoke(null);
+            yield break;
+        }
+
+        string json = webRequest.downloadHandler.text;
+
+        Debug.Log($"Motivation by ID raw response: {json}");
+
+        string message = ParseMessage(json);
+
+        onCompleted?.Invoke(message);
+    }
+
+    private IEnumerator RequestMessageByContext(
+        PatientContextMessage context,
+        int requestId,
+        System.Action<string> onCompleted)
+    {
+        string url = $"{baseUrl}{contextMessageEndpoint}";
+
+        ContextMotivationRequest request = new ContextMotivationRequest
+        {
             patientName = context.patientName,
             age = context.age,
             sex = context.sex,
@@ -72,42 +192,55 @@ public class MotivationApiClient : MonoBehaviour
         webRequest.uploadHandler = new UploadHandlerRaw(bodyRaw);
         webRequest.downloadHandler = new DownloadHandlerBuffer();
         webRequest.SetRequestHeader("Content-Type", "application/json");
+        webRequest.SetRequestHeader("Accept", "application/json");
+
+        Debug.Log($"Requesting context motivation from: {url}");
+        Debug.Log($"Context motivation request body: {body}");
 
         yield return webRequest.SendWebRequest();
 
         if (requestId != currentRequestId)
         {
-            Debug.Log($"Ignoring old backend response. Request {requestId} is no longer active.");
+            onCompleted?.Invoke(null);
             yield break;
         }
+
+        Debug.Log($"Context motivation response code: {webRequest.responseCode}");
 
         if (webRequest.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError($"Motivation API error: {webRequest.error}");
-            Debug.LogError(webRequest.downloadHandler.text);
-
-            avatarBridge.ShowMessageOnCurrentAvatar(
-    $"{context.patientName}, has avanzado en tu proceso. Sigue paso a paso con tu recuperación.",
-    "empathetic",
-    "empathetic"
-);
+            Debug.LogError($"Context motivation API error: {webRequest.error}");
+            Debug.LogError($"Context motivation response: {webRequest.downloadHandler.text}");
+            onCompleted?.Invoke(null);
             yield break;
         }
 
-        string responseText = webRequest.downloadHandler.text;
-        Debug.Log($"Motivation API response: {responseText}");
+        string json = webRequest.downloadHandler.text;
 
-        MotivationApiResponse apiResponse =
-            JsonUtility.FromJson<MotivationApiResponse>(responseText);
+        Debug.Log($"Context motivation raw response: {json}");
 
+        string message = ParseMessage(json);
 
-        AvatarMessage avatarMessage = BuildAvatarMessage(context, apiResponse.message);
+        onCompleted?.Invoke(message);
+    }
 
-        avatarBridge.ShowMessageOnCurrentAvatar(
-            avatarMessage.message,
-            avatarMessage.emotion,
-            avatarMessage.animation
-        );
+    private string ParseMessage(string json)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+            return null;
+
+        MotivationResponse response = JsonUtility.FromJson<MotivationResponse>(json);
+
+        if (response == null)
+            return null;
+
+        if (!string.IsNullOrWhiteSpace(response.message))
+            return response.message;
+
+        if (!string.IsNullOrWhiteSpace(response.Message))
+            return response.Message;
+
+        return null;
     }
 
     private AvatarMessage BuildAvatarMessage(PatientContextMessage context, string message)
@@ -127,15 +260,10 @@ public class MotivationApiClient : MonoBehaviour
             animation = "empathetic";
         }
 
-        string avatarProfile = ResolveAvatarProfile(context);
-
-        Debug.Log($"Resolved profile: {avatarProfile}");
-        Debug.Log($"Resolved animation: {animation}");
-
         return new AvatarMessage
         {
             message = message,
-            avatarProfile = avatarProfile,
+            avatarProfile = ResolveAvatarProfile(context),
             emotion = emotion,
             animation = animation,
             voiceStyle = ResolveVoiceStyle(context)
@@ -144,12 +272,6 @@ public class MotivationApiClient : MonoBehaviour
 
     private string ResolveAvatarProfile(PatientContextMessage context)
     {
-        if (!string.IsNullOrWhiteSpace(context.technologyLevel) &&
-            context.technologyLevel.ToLowerInvariant() == "low")
-        {
-            return "neutral_support";
-        }
-
         if (context.age < 30)
         {
             return "young_adult_support";
@@ -160,36 +282,85 @@ public class MotivationApiClient : MonoBehaviour
             return "older_adult_support";
         }
 
+        if (!string.IsNullOrWhiteSpace(context.technologyLevel) &&
+            context.technologyLevel.ToLowerInvariant() == "low")
+        {
+            return "neutral_support";
+        }
+
         return "adult_support";
     }
 
     private string ResolveVoiceStyle(PatientContextMessage context)
     {
-        if (context.age >= 60 || context.technologyLevel == "low")
-            return "calm_supportive";
-
-        return "warm";
+        return context.sex == "M" ? "male" : "female";
     }
 
-    private string CreateFallbackMessage(PatientContextMessage context)
+    private string BuildPersonalizedFallbackMessage(PatientContextMessage context)
     {
-        AvatarMessage fallback = new AvatarMessage
-        {
-            message = $"{context.patientName}, has avanzado en tu proceso. Sigue paso a paso con tu recuperación.",
-            avatarProfile = ResolveAvatarProfile(context),
-            emotion = "empathetic",
-            animation = "empathetic",
-            voiceStyle = ResolveVoiceStyle(context)
-        };
+        string patientName = string.IsNullOrWhiteSpace(context.patientName)
+            ? "Paciente"
+            : context.patientName;
 
-        return JsonUtility.ToJson(fallback);
+        string therapyName = string.IsNullOrWhiteSpace(context.therapyName)
+            ? "tu terapia"
+            : context.therapyName;
+
+        string condition = string.IsNullOrWhiteSpace(context.condition)
+            ? "tu proceso de rehabilitación"
+            : context.condition;
+
+        string mood = string.IsNullOrWhiteSpace(context.mood)
+            ? "normal"
+            : context.mood.ToLowerInvariant();
+
+        if (context.completedLastTherapy)
+        {
+            return $"{patientName}, excelente trabajo completando {therapyName}. Cada sesión que realizas suma a tu proceso de {condition}. Sigue avanzando con constancia, cuidando siempre cómo se siente tu cuerpo.";
+        }
+
+        if (mood.Contains("cansado") || mood.Contains("cansada"))
+        {
+            return $"{patientName}, gracias por continuar con {therapyName} incluso cuando te sientes con cansancio. En tu proceso de {condition}, avanzar poco a poco también cuenta. Tómate tu tiempo, escucha tu cuerpo y mantén la constancia sin exigirte de más.";
+        }
+
+        return $"{patientName}, hoy tienes una nueva oportunidad para avanzar con {therapyName}. Tu proceso de {condition} requiere paciencia, constancia y cuidado. Lo importante no es hacerlo perfecto, sino seguir dando pequeños pasos.";
     }
+}
+
+[System.Serializable]
+public class MotivationByIdRequest
+{
+    public string patientId;
+    public string therapyId;
+}
+
+[System.Serializable]
+public class ContextMotivationRequest
+{
+    public string patientName;
+    public int age;
+    public string sex;
+    public string nationality;
+    public string technologyLevel;
+    public string condition;
+    public string therapyName;
+    public string mood;
+    public bool completedLastTherapy;
+}
+
+[System.Serializable]
+public class MotivationResponse
+{
+    public string message;
+    public string Message;
 }
 
 [System.Serializable]
 public class PatientContextMessage
 {
     public string patientId;
+    public string therapyId;
     public string patientName;
     public int age;
     public string sex;
@@ -199,25 +370,4 @@ public class PatientContextMessage
     public string therapyName;
     public string mood;
     public bool completedLastTherapy;
-}
-
-[System.Serializable]
-public class MotivationRequest
-{
-    public string patientId;
-    public string patientName;
-    public int age;
-    public string sex;
-    public string nationality;
-    public string technologyLevel;
-    public string condition;
-    public string therapyName;
-    public string mood;
-    public bool completedLastTherapy;
-}
-
-[System.Serializable]
-public class MotivationApiResponse
-{
-    public string message;
 }
