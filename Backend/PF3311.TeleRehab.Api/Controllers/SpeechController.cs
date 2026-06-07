@@ -56,4 +56,26 @@ public class SpeechController : ControllerBase
                 new { message = "Speech synthesis failed." });
         }
     }
+
+    [HttpPost("transcribe")]
+public async Task<IActionResult> Transcribe(IFormFile file)
+{
+    if (file == null || file.Length == 0)
+    {
+        return BadRequest(new { message = "Audio file is required." });
+    }
+
+    await using MemoryStream memoryStream = new MemoryStream();
+    await file.CopyToAsync(memoryStream);
+
+    byte[] audioBytes = memoryStream.ToArray();
+
+    string text = await _speechService.TranscribeAsync(audioBytes);
+
+    return Ok(new
+    {
+        text
+    });
+}
+
 }

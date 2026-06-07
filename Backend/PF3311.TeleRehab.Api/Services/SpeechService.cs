@@ -79,6 +79,47 @@ public class SpeechService
 
         return builder.ToString();
     }
+
+    public async Task<string> TranscribeAsync(
+        byte[] audioBytes,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(audioBytes);
+
+        if (audioBytes.Length == 0)
+            throw new ArgumentException("Audio is required.", nameof(audioBytes));
+
+        if (string.IsNullOrWhiteSpace(_key) || string.IsNullOrWhiteSpace(_region))
+            throw new AzureSpeechConfigurationException("Azure Speech is not configured.");
+
+        var url =
+            $"https://{_region}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language=es-CR";
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, url);
+        request.Headers.Add("Ocp-Apim-Subscription-Key", _key);
+        request.Headers.Add("Accept", "application/json");
+        request.Content = new ByteArrayContent(audioBytes);
+        request.Content.Headers.ContentType =
+            new System.Net.Http.Headers.MediaTypeHeaderValue("audio/wav");
+
+        using var response = await _httpClient.SendAsync(request, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new AzureSpeechRecognitionException(
+                $"Azure Speech returned HTTP {(int)response.StatusCode}.");
+        }
+
+        var result = await response.Content.ReadFromJsonAsync<AzureSpeechRecognitionResponse>(
+            cancellationToken);
+
+        if (result is null)
+            return string.Empty;
+
+        return string.Equals(result.RecognitionStatus, "Success", StringComparison.OrdinalIgnoreCase)
+            ? result.DisplayText
+            : string.Empty;
+    }
 }
 
 public class AzureSpeechConfigurationException : Exception
@@ -95,4 +136,20 @@ public class AzureSpeechSynthesisException : Exception
         : base(message)
     {
     }
+}
+
+public class AzureSpeechRecognitionException : Exception
+{
+    public AzureSpeechRecognitionException(string message)
+        : base(message)
+    {
+    }
+}
+
+public class AzureSpeechRecognitionResponse
+{
+    public string RecognitionStatus { get; set; } = string.Empty;
+    public string DisplayText { get; set; } = string.Empty;
+    public long Offset { get; set; }
+    public long Duration { get; set; }
 }
