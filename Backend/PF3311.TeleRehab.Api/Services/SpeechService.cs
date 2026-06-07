@@ -87,7 +87,7 @@ public class SpeechService
             throw new ArgumentException("Audio is required.", nameof(audioBytes));
         }
 
-        string language = "es-CR";
+        string language = "es-ES";
 
         string url =
             $"https://{_region}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language={language}&format=simple";
