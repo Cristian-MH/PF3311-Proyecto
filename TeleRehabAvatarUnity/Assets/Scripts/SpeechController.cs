@@ -34,6 +34,10 @@ public class SpeechController : MonoBehaviour
     private int speechSessionId = 0;
     private string currentSessionSex = "F";
 
+    private string currentPatientName = "Paciente";
+    private string currentCondition = "";
+    private string currentTherapyName = "";
+
     private void Awake()
     {
         if (audioSource == null)
@@ -51,6 +55,18 @@ public class SpeechController : MonoBehaviour
         audioSource.spatialBlend = 0f;
         audioSource.volume = 1f;
         audioSource.mute = false;
+    }
+
+    public void SetPatientContext(string patientName, string condition, string therapyName)
+    {
+        currentPatientName = string.IsNullOrWhiteSpace(patientName)
+            ? "Paciente"
+            : patientName;
+
+        currentCondition = condition ?? "";
+        currentTherapyName = therapyName ?? "";
+
+        Debug.Log($"Speech context set. Patient: {currentPatientName}, Condition: {currentCondition}, Therapy: {currentTherapyName}");
     }
 
     public void Speak(string message, string sex)
@@ -269,7 +285,20 @@ public class SpeechController : MonoBehaviour
 
     private IEnumerator PlayClosingMessage(string patientResponse)
     {
-        string closingMessage = BuildClosingMessage(patientResponse);
+        string closingMessage = null;
+
+        yield return StartCoroutine(RequestClosingMessageFromBackend(
+            patientResponse,
+            result => closingMessage = result
+        ));
+
+        if (string.IsNullOrWhiteSpace(closingMessage))
+        {
+            Debug.LogWarning("Closing message from backend was empty. Using fallback.");
+
+            closingMessage =
+                "Gracias por compartir cómo te sentiste. Tu respuesta queda registrada y seguimos avanzando paso a paso en tu recuperación.";
+        }
 
         Debug.Log($"Closing message: {closingMessage}");
 
@@ -294,40 +323,57 @@ public class SpeechController : MonoBehaviour
         OnFullInteractionCompleted?.Invoke();
     }
 
-    private string BuildClosingMessage(string patientResponse)
+    private IEnumerator RequestClosingMessageFromBackend(
+        string patientResponse,
+        System.Action<string> onCompleted)
     {
-        if (string.IsNullOrWhiteSpace(patientResponse) ||
-            patientResponse.ToLowerInvariant().Contains("no se detectó texto"))
+        string url = $"{baseUrl}/Motivation/closing-message";
+
+        ClosingMessageRequest request = new ClosingMessageRequest
         {
-            return "Gracias por intentarlo. No logré escuchar bien tu respuesta, pero recuerda avanzar poco a poco con tu recuperación.";
+            patientName = currentPatientName,
+            patientResponse = patientResponse,
+            condition = currentCondition,
+            therapyName = currentTherapyName
+        };
+
+        string body = JsonUtility.ToJson(request);
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(body);
+
+        using UnityWebRequest webRequest = new UnityWebRequest(url, "POST");
+        webRequest.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        webRequest.downloadHandler = new DownloadHandlerBuffer();
+        webRequest.SetRequestHeader("Content-Type", "application/json");
+        webRequest.SetRequestHeader("Accept", "application/json");
+
+        Debug.Log($"Requesting closing message from backend: {url}");
+        Debug.Log($"Closing message request body: {body}");
+
+        yield return webRequest.SendWebRequest();
+
+        if (webRequest.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError($"Closing message API error: {webRequest.error}");
+            Debug.LogError(webRequest.downloadHandler.text);
+            onCompleted?.Invoke(null);
+            yield break;
         }
 
-        string response = patientResponse.ToLowerInvariant();
+        string json = webRequest.downloadHandler.text;
 
-        if (response.Contains("dolor") ||
-            response.Contains("duele") ||
-            response.Contains("molestia"))
+        Debug.Log($"Closing message raw response: {json}");
+
+        ClosingMessageResponse response =
+            JsonUtility.FromJson<ClosingMessageResponse>(json);
+
+        if (response == null || string.IsNullOrWhiteSpace(response.message))
         {
-            return "Gracias por contármelo. Si sentiste dolor o molestia, realiza los ejercicios con cuidado y coméntalo con tu profesional de salud.";
+            Debug.LogWarning("Closing message response is empty or invalid.");
+            onCompleted?.Invoke(null);
+            yield break;
         }
 
-        if (response.Contains("cansado") ||
-            response.Contains("cansada") ||
-            response.Contains("agotado") ||
-            response.Contains("agotada"))
-        {
-            return "Gracias por compartirlo. Es normal sentirse cansado después de la terapia. Descansa un poco y sigue avanzando a tu ritmo.";
-        }
-
-        if (response.Contains("bien") ||
-            response.Contains("mejor") ||
-            response.Contains("excelente") ||
-            response.Contains("feliz"))
-        {
-            return "Me alegra saber que te sentiste bien. Sigue con esa constancia, cada sesión te acerca más a tu recuperación.";
-        }
-
-        return "Gracias por compartir cómo te sentiste. Tu respuesta queda registrada y nos ayuda a acompañarte mejor en tu proceso.";
+        onCompleted?.Invoke(response.message);
     }
 }
 
@@ -336,4 +382,19 @@ public class SpeechRequest
 {
     public string text;
     public string sex;
+}
+
+[System.Serializable]
+public class ClosingMessageRequest
+{
+    public string patientName;
+    public string patientResponse;
+    public string condition;
+    public string therapyName;
+}
+
+[System.Serializable]
+public class ClosingMessageResponse
+{
+    public string message;
 }

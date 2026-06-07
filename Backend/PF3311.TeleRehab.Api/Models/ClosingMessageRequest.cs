@@ -1,3 +1,5 @@
+namespace PF3311.Telerehab.API.Models;
+
 public class ClosingMessageRequest
 {
     public string PatientName { get; set; } = string.Empty;

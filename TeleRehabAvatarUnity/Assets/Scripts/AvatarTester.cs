@@ -22,12 +22,9 @@ public class AvatarTester : MonoBehaviour
     {
         yield return new WaitForSeconds(initialDelay);
 
-        //yield return RunSingleTest("=== TEST 1: AdultAvatar ===", TestAdultPatient);
-       // yield return RunSingleTest("=== TEST 2: YoungAdultAvatar ===", TestYoungPatient);
-        yield return RunSingleTest("=== TEST 3: OlderAdultAvatar ===", TestOlderPatient);
-        //yield return RunSingleTest("=== TEST 4: NeutralSupportAvatar ===", TestLowTechPatient);
+        yield return RunSingleTest("=== TEST: OlderAdultAvatar ===", TestOlderPatient);
 
-        Debug.Log("=== ALL TEST CASES COMPLETED ===");
+        Debug.Log("=== TEST COMPLETED ===");
     }
 
     private IEnumerator RunSingleTest(string testName, System.Action testAction)
@@ -71,48 +68,25 @@ public class AvatarTester : MonoBehaviour
 
     private void HandleInteractionCompleted()
     {
-        Debug.Log("Interaction completed. Moving to next avatar.");
+        Debug.Log("Interaction completed.");
         interactionFinished = true;
-    }
-
-    private void TestAdultPatient()
-    {
-        string json = @"{
-            ""patientId"": ""11111111-1111-1111-1111-111111111111"",
-            ""patientName"": ""Valeria"",
-            ""age"": 35,
-            ""sex"": ""F"",
-            ""nationality"": ""Costa Rica"",
-            ""technologyLevel"": ""medium"",
-            ""condition"": ""rehabilitación de pierna"",
-            ""therapyName"": ""Movilidad suave de pierna"",
-            ""mood"": ""normal"",
-            ""completedLastTherapy"": true
-        }";
-
-        motivationApiClient.RequestMotivationMessage(json);
-    }
-
-    private void TestYoungPatient()
-    {
-        string json = @"{
-            ""patientId"": ""22222222-2222-2222-2222-222222222222"",
-            ""patientName"": ""Cristian"",
-            ""age"": 22,
-            ""sex"": ""M"",
-            ""nationality"": ""Costa Rica"",
-            ""technologyLevel"": ""medium"",
-            ""condition"": ""rehabilitación de hombro"",
-            ""therapyName"": ""Movilidad suave de hombro"",
-            ""mood"": ""normal"",
-            ""completedLastTherapy"": false
-        }";
-
-        motivationApiClient.RequestMotivationMessage(json);
     }
 
     private void TestOlderPatient()
     {
+        string patientName = "Don Manuel";
+        string condition = "rehabilitación lumbar";
+        string therapyName = "Movilidad suave de espalda";
+
+        if (speechController != null)
+        {
+            speechController.SetPatientContext(
+                patientName,
+                condition,
+                therapyName
+            );
+        }
+
         string json = @"{
             ""patientId"": ""33333333-3333-3333-3333-333333333333"",
             ""patientName"": ""Don Manuel"",
@@ -123,24 +97,6 @@ public class AvatarTester : MonoBehaviour
             ""condition"": ""rehabilitación lumbar"",
             ""therapyName"": ""Movilidad suave de espalda"",
             ""mood"": ""cansado"",
-            ""completedLastTherapy"": false
-        }";
-
-        motivationApiClient.RequestMotivationMessage(json);
-    }
-
-    private void TestLowTechPatient()
-    {
-        string json = @"{
-            ""patientId"": ""44444444-4444-4444-4444-444444444444"",
-            ""patientName"": ""María"",
-            ""age"": 45,
-            ""sex"": ""F"",
-            ""nationality"": ""Costa Rica"",
-            ""technologyLevel"": ""low"",
-            ""condition"": ""movilidad general"",
-            ""therapyName"": ""Rutina inicial de movilidad"",
-            ""mood"": ""normal"",
             ""completedLastTherapy"": false
         }";
 

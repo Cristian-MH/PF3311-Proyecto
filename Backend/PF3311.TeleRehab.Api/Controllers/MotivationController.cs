@@ -62,8 +62,8 @@ public class MotivationController : ControllerBase
 
     [HttpPost("closing-message")]
     public async Task<IActionResult> GenerateClosingMessage(
-    [FromBody] ClosingMessageRequest request,
-    CancellationToken cancellationToken)
+        [FromBody] ClosingMessageRequest request,
+        CancellationToken cancellationToken)
     {
         if (request == null)
         {
@@ -100,5 +100,50 @@ public class MotivationController : ControllerBase
                 new { message = "Closing message generation failed." });
         }
     }
+
+    [HttpPost("context-message")]
+    public async Task<IActionResult> GenerateContextMessage(
+        [FromBody] ContextMotivationRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (request == null)
+        {
+            return BadRequest(new { message = "Request body is required." });
+        }
+
+        if (string.IsNullOrWhiteSpace(request.PatientName))
+        {
+            return BadRequest(new { message = "Patient name is required." });
+        }
+
+        if (string.IsNullOrWhiteSpace(request.TherapyName))
+        {
+            return BadRequest(new { message = "Therapy name is required." });
+        }
+
+        try
+        {
+            string message = await _motivationService.GenerateContextMessageAsync(
+                request,
+                cancellationToken);
+
+            return Ok(new ContextMotivationResponse
+            {
+                Message = message
+            });
+        }
+        catch (OpenAiConfigurationException)
+        {
+            return StatusCode(
+                StatusCodes.Status503ServiceUnavailable,
+                new { message = "OpenAI is not configured." });
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException or OpenAiMotivationGenerationException)
+        {
+            return StatusCode(
+                StatusCodes.Status502BadGateway,
+                new { message = "Context motivation message generation failed." });
+        }
+    }
 }
-    

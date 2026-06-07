@@ -49,13 +49,17 @@ public class MotivationApiClient : MonoBehaviour
 
     private IEnumerator PostMotivationRequest(PatientContextMessage context, int requestId)
     {
-        string url = $"{baseUrl}/Motivation/message";
+        string url = $"{baseUrl}/Motivation/context-message";
 
         MotivationRequest request = new MotivationRequest
         {
             patientId = context.patientId,
             patientName = context.patientName,
             age = context.age,
+            sex = context.sex,
+            nationality = context.nationality,
+            technologyLevel = context.technologyLevel,
+            condition = context.condition,
             therapyName = context.therapyName,
             mood = context.mood,
             completedLastTherapy = context.completedLastTherapy
@@ -203,6 +207,10 @@ public class MotivationRequest
     public string patientId;
     public string patientName;
     public int age;
+    public string sex;
+    public string nationality;
+    public string technologyLevel;
+    public string condition;
     public string therapyName;
     public string mood;
     public bool completedLastTherapy;
