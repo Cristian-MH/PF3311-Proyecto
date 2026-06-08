@@ -42,3 +42,16 @@ for settings_file in "$flutter_project/settings.gradle" "$export_path/settings.g
     perl -0pi -e "s/^include ':launcher'\\R//m" "$settings_file"
   fi
 done
+
+for manifest_file in "$export_path/src/main/AndroidManifest.xml" "$export_path/unityLibrary/src/main/AndroidManifest.xml"; do
+  if [[ -f "$manifest_file" ]]; then
+    perl -0pi -e 's/\n\s*<intent-filter>\s*<category android:name="android\.intent\.category\.LAUNCHER" \/> \s*<action android:name="android\.intent\.action\.MAIN" \/> \s*<\/intent-filter>//sx' "$manifest_file"
+    perl -0pi -e 's/\n\s*<intent-filter>\s*<action android:name="android\.intent\.action\.MAIN" \/> \s*<category android:name="android\.intent\.category\.LAUNCHER" \/> \s*<\/intent-filter>//sx' "$manifest_file"
+  fi
+done
+
+for proguard_file in "$export_path/proguard-unity.txt" "$export_path/unityLibrary/proguard-unity.txt"; do
+  if [[ -f "$proguard_file" ]]; then
+    perl -0pi -e 's/^-ignorewarnings\R\R?//m' "$proguard_file"
+  fi
+done

@@ -43,6 +43,9 @@ public class SpeechToTextController : MonoBehaviour
     {
         Debug.Log("STT started. Abriendo micrófono para escuchar al paciente.");
 
+        yield return StartCoroutine(EnsureMicrophonePermission());
+        yield return StartCoroutine(WaitForMicrophoneDevices());
+
         if (Microphone.devices.Length == 0)
         {
             Debug.LogWarning("No microphone detected.");
@@ -145,6 +148,38 @@ public class SpeechToTextController : MonoBehaviour
         Debug.Log($"WAV bytes sent: {wavData.Length}");
 
         yield return StartCoroutine(SendAudioToBackend(wavData));
+    }
+
+    private IEnumerator EnsureMicrophonePermission()
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        if (Application.HasUserAuthorization(UserAuthorization.Microphone))
+            yield break;
+
+        if (messageText != null)
+            messageText.text = "Solicitando permiso de micrófono...";
+
+        yield return Application.RequestUserAuthorization(UserAuthorization.Microphone);
+
+        if (!Application.HasUserAuthorization(UserAuthorization.Microphone))
+        {
+            Debug.LogWarning("Microphone permission was not granted.");
+        }
+#else
+        yield break;
+#endif
+    }
+
+    private IEnumerator WaitForMicrophoneDevices()
+    {
+        const float deviceTimeout = 3f;
+        float elapsed = 0f;
+
+        while (Microphone.devices.Length == 0 && elapsed < deviceTimeout)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
     }
 
     private IEnumerator SendAudioToBackend(byte[] wavData)

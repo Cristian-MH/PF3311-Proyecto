@@ -46,6 +46,21 @@ public class AvatarBridge : MonoBehaviour
 
         currentPatientId = context.patientId;
 
+        if (speechController != null)
+        {
+            speechController.SetPatientContext(
+                context.patientName,
+                context.condition,
+                context.therapyName,
+                context.patientId,
+                context.therapyId
+            );
+        }
+        else
+        {
+            Debug.LogWarning("SpeechController is not assigned in AvatarBridge.");
+        }
+
         string avatarProfile = ResolveAvatarProfile(context);
 
         Debug.Log($"Loading avatar before backend call: {avatarProfile}");

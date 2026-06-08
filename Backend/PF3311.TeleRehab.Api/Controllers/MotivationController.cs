@@ -76,6 +76,13 @@ public class MotivationController : ControllerBase
             return BadRequest(new { message = "Patient response is required." });
         }
 
+        bool hasContextIds = request.PatientId != Guid.Empty || request.TherapyId != Guid.Empty;
+
+        if (hasContextIds && (request.PatientId == Guid.Empty || request.TherapyId == Guid.Empty))
+        {
+            return BadRequest(new { message = "PatientId and TherapyId are required together." });
+        }
+
         try
         {
             string message = await _motivationService.GenerateClosingMessageAsync(
@@ -86,6 +93,10 @@ public class MotivationController : ControllerBase
             {
                 Message = message
             });
+        }
+        catch (MotivationContextNotFoundException exception)
+        {
+            return NotFound(new { message = exception.Message });
         }
         catch (OpenAiConfigurationException)
         {

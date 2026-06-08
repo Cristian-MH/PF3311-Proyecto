@@ -227,6 +227,8 @@ public class MotivationService
         if (string.IsNullOrWhiteSpace(_apiKey))
             throw new OpenAiConfigurationException("OpenAI:ApiKey is not configured.");
 
+        var context = ResolveClosingMessageRequest(request);
+
         var requestBody = new
         {
             model = _model,
@@ -260,17 +262,25 @@ public class MotivationService
             {
                 patient = new
                 {
-                    name = request.PatientName,
-                    condition = request.Condition
+                    name = context.Request.PatientName,
+                    condition = context.Request.Condition
                 },
                 therapy = new
                 {
-                    name = request.TherapyName
+                    name = context.Request.TherapyName
                 },
                 interaction = new
                 {
-                    patientResponse = request.PatientResponse
-                }
+                    patientResponse = context.Request.PatientResponse
+                },
+                recentProgress = context.RecentLogs.Select(log => new
+                {
+                    log.CompletedAt,
+                    log.Completed,
+                    log.MoodLevel,
+                    log.PainLevel,
+                    log.Comment
+                })
             }, _jsonOptions)
         };
 
@@ -288,6 +298,31 @@ public class MotivationService
         }
 
         return ExtractOutputText(responseJson);
+    }
+
+    private (ClosingMessageRequest Request, IReadOnlyList<TherapyLog> RecentLogs)
+        ResolveClosingMessageRequest(ClosingMessageRequest request)
+    {
+        if (request.PatientId == Guid.Empty && request.TherapyId == Guid.Empty)
+            return (request, Array.Empty<TherapyLog>());
+
+        MotivationRequest motivationRequest = new()
+        {
+            PatientId = request.PatientId,
+            TherapyId = request.TherapyId
+        };
+
+        var (patient, therapy, recentLogs) = GetContext(motivationRequest);
+
+        return (new ClosingMessageRequest
+        {
+            PatientId = patient.Id,
+            TherapyId = therapy.Id,
+            PatientName = patient.FullName,
+            PatientResponse = request.PatientResponse,
+            Condition = patient.Condition,
+            TherapyName = therapy.Name
+        }, recentLogs);
     }
 
     public string GenerateFallbackMessage(MotivationRequest request)

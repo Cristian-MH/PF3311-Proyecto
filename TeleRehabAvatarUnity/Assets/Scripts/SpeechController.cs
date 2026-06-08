@@ -37,6 +37,8 @@ public class SpeechController : MonoBehaviour
     private string currentPatientName = "Paciente";
     private string currentCondition = "";
     private string currentTherapyName = "";
+    private string currentPatientId = "";
+    private string currentTherapyId = "";
 
     private void Awake()
     {
@@ -57,7 +59,12 @@ public class SpeechController : MonoBehaviour
         audioSource.mute = false;
     }
 
-    public void SetPatientContext(string patientName, string condition, string therapyName)
+    public void SetPatientContext(
+        string patientName,
+        string condition,
+        string therapyName,
+        string patientId = "",
+        string therapyId = "")
     {
         currentPatientName = string.IsNullOrWhiteSpace(patientName)
             ? "Paciente"
@@ -65,8 +72,10 @@ public class SpeechController : MonoBehaviour
 
         currentCondition = condition ?? "";
         currentTherapyName = therapyName ?? "";
+        currentPatientId = patientId ?? "";
+        currentTherapyId = therapyId ?? "";
 
-        Debug.Log($"Speech context set. Patient: {currentPatientName}, Condition: {currentCondition}, Therapy: {currentTherapyName}");
+        Debug.Log($"Speech context set. PatientId: {currentPatientId}, TherapyId: {currentTherapyId}, Patient: {currentPatientName}, Condition: {currentCondition}, Therapy: {currentTherapyName}");
     }
 
     public void Speak(string message, string sex)
@@ -331,6 +340,8 @@ public class SpeechController : MonoBehaviour
 
         ClosingMessageRequest request = new ClosingMessageRequest
         {
+            patientId = currentPatientId,
+            therapyId = currentTherapyId,
             patientName = currentPatientName,
             patientResponse = patientResponse,
             condition = currentCondition,
@@ -387,6 +398,8 @@ public class SpeechRequest
 [System.Serializable]
 public class ClosingMessageRequest
 {
+    public string patientId;
+    public string therapyId;
     public string patientName;
     public string patientResponse;
     public string condition;

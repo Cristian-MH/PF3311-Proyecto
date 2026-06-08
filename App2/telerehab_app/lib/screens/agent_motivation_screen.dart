@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_embed_unity/flutter_embed_unity.dart';
 
 import '../models/patient.dart';
@@ -29,9 +30,14 @@ class AgentMotivationScreen extends StatefulWidget {
 
 class _AgentMotivationScreenState extends State<AgentMotivationScreen>
     with SingleTickerProviderStateMixin {
+  static const MethodChannel _audioPermissionChannel = MethodChannel(
+    'com.pf3311.telerehab.agent/audio_permission',
+  );
+
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   final List<Timer> _unityMessageTimers = [];
+  bool _microphonePermissionReady = false;
 
   bool get _supportsEmbeddedUnity =>
       !kIsWeb &&
@@ -55,9 +61,7 @@ class _AgentMotivationScreenState extends State<AgentMotivationScreen>
     );
 
     if (_supportsEmbeddedUnity) {
-      _unityMessageTimers
-        ..add(Timer(const Duration(seconds: 1), _sendMessagesToUnity))
-        ..add(Timer(const Duration(seconds: 2), _sendMessagesToUnity));
+      _prepareMicrophonePermissionAndStartUnity();
     }
   }
 
@@ -70,7 +74,41 @@ class _AgentMotivationScreenState extends State<AgentMotivationScreen>
     super.dispose();
   }
 
+  Future<void> _prepareMicrophonePermissionAndStartUnity() async {
+    bool granted = true;
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      granted = await _requestAndroidMicrophonePermission();
+    }
+
+    if (!mounted) return;
+
+    setState(() => _microphonePermissionReady = granted);
+
+    if (!granted) {
+      return;
+    }
+
+    _unityMessageTimers
+      ..add(Timer(const Duration(seconds: 1), _sendMessagesToUnity))
+      ..add(Timer(const Duration(seconds: 2), _sendMessagesToUnity));
+  }
+
+  Future<bool> _requestAndroidMicrophonePermission() async {
+    try {
+      final granted = await _audioPermissionChannel.invokeMethod<bool>(
+        'requestMicrophonePermission',
+      );
+      return granted ?? false;
+    } catch (error) {
+      debugPrint('No fue posible solicitar permiso de micrófono: $error');
+      return false;
+    }
+  }
+
   void _sendMessagesToUnity() {
+    if (!_microphonePermissionReady) return;
+
     final patientContext = jsonEncode({
       'patientId': widget.patient.id,
       'therapyId': widget.therapy.id,
@@ -122,29 +160,31 @@ class _AgentMotivationScreenState extends State<AgentMotivationScreen>
       return Center(child: _buildAvatar(context));
     }
 
+    if (!_microphonePermissionReady) {
+      return Container(
+        height: 320,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(28),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: FilledButton.icon(
+            onPressed: _prepareMicrophonePermissionAndStartUnity,
+            icon: const Icon(Icons.mic),
+            label: const Text('Activar micrófono'),
+          ),
+        ),
+      );
+    }
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(28),
       child: const SizedBox(
         height: 320,
         child: EmbedUnity(),
       ),
-    );
-  }
-
-  Widget _buildSpeakingIndicator(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(
-          Icons.auto_awesome,
-          color: App2Palette.violet,
-        ),
-        const SizedBox(width: 8),
-        Text(
-          'Mensaje personalizado de tu agente',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-      ],
     );
   }
 
@@ -172,33 +212,6 @@ class _AgentMotivationScreenState extends State<AgentMotivationScreen>
           children: [
             const SizedBox(height: 16),
             _buildAgentVisual(context),
-            const SizedBox(height: 20),
-            _buildSpeakingIndicator(context),
-            const SizedBox(height: 24),
-            Card(
-              color: Colors.white,
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    Text(
-                      'Hola, ${widget.patient.fullName}',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: App2Palette.deepNavy,
-                            fontWeight: FontWeight.bold,
-                          ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Tu agente está generando un mensaje personalizado según tu contexto de rehabilitación.',
-                      style: Theme.of(context).textTheme.bodyLarge,
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () => Navigator.pop(context),
