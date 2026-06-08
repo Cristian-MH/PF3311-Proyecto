@@ -218,7 +218,7 @@ Usa `"F"` para probar la voz femenina.
 
 ## Video de demostración
 
-[Ver video de demostración de la PoC en YouTube]([https://youtu.be/xaZLknilD-4]).
+[Ver video de demostración de la PoC en YouTube](https://youtu.be/xaZLknilD-4).
 
 ## Autor
 
